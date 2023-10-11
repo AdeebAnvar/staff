@@ -280,7 +280,7 @@ class CustomBookingController extends GetxController
     }
   }
 
-  RxMap<String, dynamic> placesForItinerary = <String, dynamic>{}.obs;
+  RxMap<String, PlacesModel> placesForItinerary = <String, PlacesModel>{}.obs;
   RxMap<String, List<String>> vehiclesForItinerary =
       <String, List<String>>{}.obs;
   RxMap<String, List<String>> vehiclestypForItinerary =
@@ -1403,56 +1403,73 @@ class CustomBookingController extends GetxController
 
   Future<void> createItinerary() async {
     generatingPDF.value = true;
-    // try {
-    final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
-    // log(telecallerModel.depImage.toString());
+    try {
+      // final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
 
-    await downloadImage(depImage)
-        .then((String? value) => createPdf(pdf, value.toString()));
+      // await downloadImage(depImage)
+      //     .then((String? value) => createPdf(pdf, value.toString()));
 
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
-    final File pdfFile = File(pdfPath);
+      // final Directory appDocDir = await getApplicationDocumentsDirectory();
+      // final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
+      // final File pdfFile = File(pdfPath);
 
-    await pdfFile.writeAsBytes(await pdf.save()).then(
-          (File value) =>
-              Get.toNamed(Routes.NO_INTERNET, arguments: <String>[pdfPath]),
-        );
-    generatingPDF.value = false;
-    final List<Map<String, List<String>>?> inputMaps =
-        <Map<String, List<String>>?>[
-      placesForSingleDayName,
-      addonsForSingleDayName,
-      activitiesForSingleDayName,
-    ];
-    final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;
-    await postSnapshots(inputMaps, bookables);
-    if (isProposal.value != true) {
-      final List<List<String>> resultList = combineMaps(inputMaps);
-      final String id = tours
-          .firstWhere((TourModel element) =>
-              element.tourName == selectedTourWithoutTransit.value)
-          .tourId
-          .toString();
-      CustomBookingRepo().customBooking(
-        customerId: customerId.toString(),
-        amountPayable: price.toString(),
-        advPayment: '${advAmount.value + extraAdvAmount.value}',
-        tasks: resultList,
-        bookables: bookables,
-        tourId: id,
-        tourStartingDate: tourStartingDateTime.toString(),
-        tourEndingDate: tourEndingDateTime.toString(),
-        depID: depId.toString(),
-        branchId: branchId.toString(),
-        filePath: pdfPath,
-      );
+      // await pdfFile.writeAsBytes(await pdf.save()).then(
+      //       (File value) =>
+      //           Get.toNamed(Routes.NO_INTERNET, arguments: <String>[pdfPath]),
+      //     );
+      // generatingPDF.value = false;
+      // final List<Map<String, List<String>>?> inputMaps =
+      //     <Map<String, List<String>>?>[
+      //   placesForSingleDayName,
+      //   addonsForSingleDayName,
+      //   activitiesForSingleDayName,
+      // ];
+
+      final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;
+      await postSnapshots();
+      if (isProposal.value != true) {
+        // final List<List<String>> resultList = combineMaps(inputMaps);
+        final String id = tours
+            .firstWhere((TourModel element) =>
+                element.tourName == selectedTourWithoutTransit.value)
+            .tourId
+            .toString();
+        //*********************************** */
+        //list of tour ids
+        // strt date
+        // end date
+        // day
+        // night
+        // adult
+        // customer id
+        // kid
+        // infant
+        // list of data
+        // place id
+        // addon id list
+        // activity id list
+        // vehicle id list
+        // room id list
+        //*********************************** */
+        // CustomBookingRepo().customBooking(
+        //   customerId: customerId.toString(),
+        //   amountPayable: price.toString(),
+        //   advPayment: '${advAmount.value + extraAdvAmount.value}',
+        //   tasks: resultList,
+        //   bookables: bookables,
+        //   tourId: id,
+        //   tourStartingDate: tourStartingDateTime.toString(),
+        //   tourEndingDate: tourEndingDateTime.toString(),
+        //   depID: depId.toString(),
+        //   branchId: branchId.toString(),
+        //   filePath: pdfPath,
+        // );
+      }
+    } catch (e) {
+      generatingPDF.value = false;
+
+      log('PDF CREATE CATCH $e');
     }
-    // } catch (e) {
-    //   generatingPDF.value = false;
-
-    //   log('PDF CREATE CATCH $e');
-    // }
   }
 
   List<List<String>> combineMaps(List<Map<String, List<String>>?> maps) {
@@ -1512,7 +1529,7 @@ class CustomBookingController extends GetxController
         build: (pw.Context context) {
           return <pw.Widget>[
             pw.Wrap(
-              children: [
+              children: <pw.Widget>[
                 pw.Header(
                   decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.white)),
@@ -1528,7 +1545,7 @@ class CustomBookingController extends GetxController
                           ),
                         ),
                         pw.Text(
-                          '${days}D|${nights}N',
+                          '$days D | $nights N',
                           style: pw.TextStyle(
                             fontWeight: pw.FontWeight.bold,
                             fontSize: 22,
@@ -1556,7 +1573,7 @@ class CustomBookingController extends GetxController
                         '*Note : This is just a referral itinerary Upon confirmation, please get in touch with our executive and ask for your itinerary confirmation. The itinerary here is not valid for your tour.',
                     style: pw.TextStyle(
                         color: PdfColors.red900,
-                        fontSize: 10,
+                        fontSize: 15,
                         fontWeight: pw.FontWeight.bold),
                   ),
                 if (isProposal.value)
@@ -1568,7 +1585,7 @@ class CustomBookingController extends GetxController
 *Note : This itinerary is only valid upto 5 days from ${DateTime.now().toDatewithMonthFormat()}''',
                         style: pw.TextStyle(
                             color: PdfColors.red900,
-                            fontSize: 10,
+                            fontSize: 15,
                             fontWeight: pw.FontWeight.bold),
                       ),
                     ],
@@ -1615,6 +1632,9 @@ class CustomBookingController extends GetxController
                         //               ?.length ??
                         //           0),
                         // pw.SizedBox(height: 10),
+                        pw.Paragraph(
+                            text:
+                                '${placesForItinerary['Day ${dayIndex + 1}']}'),
                         if (vehiclesForItinerary['Day ${dayIndex + 1}'] !=
                                 null &&
                             vehiclesForItinerary['Day ${dayIndex + 1}']!
@@ -1848,32 +1868,56 @@ A TOWER COMPLEX, KALVARY, JUNCTION, POOTHOLE ROAD,\nTHRISSUR, KERALA 680004 | 04
     );
   }
 
-  Future<void> postSnapshots(List<Map<String, List<String>>?> inputMaps,
-      List<String> bookables) async {
-    // final List<List<String>> resultList = combineMaps(inputMaps);
-    // final String id = tours
-    //     .firstWhere((TourModel element) =>
-    //         element.tourName == selectedTourWithoutTransit.value)
-    //     .tourId
-    //     .toString();
-    // CustomBookingRepo().customBooking(
-    //   customerId: customerId.toString(),
-    //   amountPayable: price.toString(),
-    //   advPayment: '${advAmount.value + extraAdvAmount.value}',
-    //   tasks: resultList,
-    //   bookables: bookables,
-    //   tourId: id,
-    //   tourStartingDate: tourStartingDateTime.toString(),
-    //   tourEndingDate: tourEndingDateTime.toString(),
-    //   depID: depId.toString(),
-    //   branchId: branchId.toString(),
-    //   filePath: pdfPath,
+  Future<void> postSnapshots() async {
+    final String tourid = tours
+        .firstWhere((TourModel element) =>
+            element.tourName == selectedTourWithoutTransit.value)
+        .tourId
+        .toString();
+    final List<String> addonIds = <String>[];
+    for (int i = 0; i < addonsForSingleDayName.length; i++) {
+      if (addonsForSingleDayName['Day ${i + 1}'] != null &&
+          addonsForSingleDayName['Day ${i + 1}']!.isNotEmpty) {
+        // [Shalimar Garden , Nishanth]
+        final List<String>? addData = addonsForSingleDayName['Day ${i + 1}'];
+        for (final String data in addData!) {
+          // Shalimar Garden
+          final String? addonId = addonsModel['Day ${i + 1}']!
+              .firstWhere(
+                (AddonsModel element) => element.addonName == data,
+                orElse: () => AddonsModel(),
+              )
+              .addonId;
+          addonIds.add(addonId!);
+        }
+      }
+    }
+    log(addonIds.toString());
+    log('placesForSingleDayName : $placesForSingleDayName');
+    log('addonsForSingleDayName : $addonsForSingleDayName');
+    log('activitiesForSingleDayName : $activitiesForSingleDayName');
+    // final ItinerarySnapshotsData data = ItinerarySnapshotsData(
+    //   activity: activityIds,
+    //   addons: addonIds,
+    //   room: roomIds,
+    //   placeId: placeId,
+    //   vehicle: vehicleIds,
     // );
-    SnapShotModel snapShotModel = SnapShotModel(
+    final List<ItinerarySnapshotsData> itinerarySnapshotsDataList =
+        <ItinerarySnapshotsData>[];
+    final SnapShotModel snapShotModel = SnapShotModel(
       adult: adults.value,
+      data: itinerarySnapshotsDataList,
+      day: days.value,
+      endDate: tourEndingDateTime,
+      startDate: tourStartingDateTime,
+      infant: infants.value,
+      kid: kids.value,
+      night: nights.value,
+      tourId: <String>[tourid],
       customerId: int.parse(customerId.toString()),
     );
-    CustomBookingRepo().postSnapshots(snapShotModel);
+    // CustomBookingRepo().postSnapshots(snapShotModel);
   }
 }
 

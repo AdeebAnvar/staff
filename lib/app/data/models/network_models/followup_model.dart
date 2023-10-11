@@ -21,6 +21,7 @@ class FollowUpModel {
       this.tourCode,
       this.leadId,
       this.followUp,
+      this.cid,
       this.followUpDate});
   String? customerId;
   String? customerName;
@@ -36,6 +37,7 @@ class FollowUpModel {
   String? customerCity;
   String? depId;
   String? branchId;
+  int? cid;
   String? userId;
   bool? assigned;
   String? tourCode;
@@ -63,6 +65,7 @@ class FollowUpModel {
         'assigned': assigned,
         'tour_code': tourCode,
         'lead_id': leadId,
+        'cid': cid,
       };
 
   static FollowUpModel fromJson(Map<String, dynamic> json) => FollowUpModel(
@@ -73,6 +76,7 @@ class FollowUpModel {
       customerPhone: json['customer_phone'] == null
           ? ''
           : json['customer_phone'] as String,
+      cid: json['cid'] as int,
       customerWhatsapp: json['customer_whatsapp'] == null
           ? ''
           : json['customer_whatsapp'] as String,

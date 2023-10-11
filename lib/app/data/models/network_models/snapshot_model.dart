@@ -12,7 +12,7 @@ class SnapShotModel {
       this.shotId,
       this.created,
       this.data});
-  List<int>? tourId;
+  List<String>? tourId;
   String? startDate;
   String? endDate;
   int? day;
@@ -21,7 +21,7 @@ class SnapShotModel {
   int? customerId;
   int? kid;
   int? infant;
-  List<Data>? data;
+  List<ItinerarySnapshotsData>? data;
   String? shotId;
   String? created;
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -34,7 +34,7 @@ class SnapShotModel {
         'customer_id': customerId,
         'kid': kid,
         'infant': infant,
-        'data': data!.map((Data v) => v.toJson()).toList(),
+        'data': data!.map((ItinerarySnapshotsData v) => v.toJson()).toList(),
       };
   static SnapShotModel fromJson(Map<String, dynamic> json) => SnapShotModel(
         shotId: json['shot_id'] as String,
@@ -48,23 +48,24 @@ class SnapShotModel {
         infant: json['infant'] as int,
         data: json['data'] != null
             ? (json['data'] as List<dynamic>)
-                .map((dynamic e) => Data.fromJson(e as Map<String, dynamic>))
+                .map((dynamic e) =>
+                    ItinerarySnapshotsData.fromJson(e as Map<String, dynamic>))
                 .toList()
-            : <Data>[],
+            : <ItinerarySnapshotsData>[],
         created: json['created'] as String,
-        tourId: json['tour_id'] as List<int>,
+        tourId: json['tour_id'] as List<String>,
       );
 }
 
-class Data {
-  Data(
+class ItinerarySnapshotsData {
+  ItinerarySnapshotsData(
       {this.placeId,
       this.addons,
       this.activity,
       this.vehicle,
       this.room,
       this.food});
-  int? placeId;
+  String? placeId;
   List<int>? addons;
   List<int>? activity;
   List<int>? vehicle;
@@ -79,8 +80,9 @@ class Data {
         'room': room,
         'food': food,
       };
-  static Data fromJson(Map<String, dynamic> json) => Data(
-        placeId: json['place_id'] as int,
+  static ItinerarySnapshotsData fromJson(Map<String, dynamic> json) =>
+      ItinerarySnapshotsData(
+        placeId: json['place_id'] as String,
         addons: json['addons'] as List<int>,
         activity: json['activity'] as List<int>,
         vehicle: json['vehicle'] as List<int>,

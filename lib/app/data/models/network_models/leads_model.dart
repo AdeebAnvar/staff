@@ -12,6 +12,7 @@ class LeadsModel {
       this.customerSource,
       this.customerAddress,
       this.customerCategory,
+      this.cid,
       this.customerRemarks,
       this.customerCity,
       this.depId,
@@ -36,6 +37,7 @@ class LeadsModel {
   String? customerCity;
   String? depId;
   String? branchId;
+  int? cid;
   String? userId;
   bool? assigned;
   String? tourCode;
@@ -63,6 +65,7 @@ class LeadsModel {
         'assigned': assigned,
         'tour_code': tourCode,
         'lead_id': leadId,
+        'cid': cid,
       };
 
   static LeadsModel fromJson(Map<String, dynamic> json) => LeadsModel(
@@ -73,6 +76,7 @@ class LeadsModel {
       customerPhone: json['customer_phone'] == null
           ? ''
           : json['customer_phone'] as String,
+      cid: json['cid'] as int,
       customerWhatsapp: json['customer_whatsapp'] == null
           ? ''
           : json['customer_whatsapp'] as String,

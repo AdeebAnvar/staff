@@ -42,8 +42,7 @@ class SingleLeadView extends GetView<SingleLeadController> {
               padding: const EdgeInsets.all(19.0),
               child: Column(
                 children: <Widget>[
-                  buildItem(
-                      'Customer ID', controller.leads[0].customerId.toString()),
+                  buildItem('Customer ID', controller.leads[0].cid.toString()),
                   buildItem('Name', controller.leads[0].customerName),
                   buildItem('Tour Name', controller.leads[0].tourCode),
                   buildItem('Tour Code', controller.tourCode),

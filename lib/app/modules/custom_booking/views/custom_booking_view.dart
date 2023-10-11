@@ -37,8 +37,9 @@ class CustomBookingView extends GetView<CustomBookingController> {
           builder: (_) => SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             physics: const RangeMaintainingScrollPhysics(
-                parent: BouncingScrollPhysics(
-                    decelerationRate: ScrollDecelerationRate.fast)),
+              parent: BouncingScrollPhysics(
+                  decelerationRate: ScrollDecelerationRate.fast),
+            ),
             child: Form(
               key: controller.formKey,
               child: Column(
@@ -167,7 +168,11 @@ class CustomBookingView extends GetView<CustomBookingController> {
                       }
                       for (int i = 0; i < int.parse(p0); i++) {
                         controller.placesForItinerary['Day ${i + 1}'] =
-                            <String, PlacesModel>{};
+                            PlacesModel();
+                      }
+                      for (int i = 0; i < int.parse(p0); i++) {
+                        controller.selectedActivityForaday['Day ${i + 1}'] =
+                            <ActivityModel>[];
                       }
                       for (int i = 0; i < int.parse(p0); i++) {
                         controller.vehiclesForItinerary['Day ${i + 1}'] =

@@ -535,7 +535,24 @@ class CreateItinerarySection extends StatelessWidget {
                     onConfirm: (List<ActivityModel> p0) {
                       controller.selectedActivityForaday[
                           'Day ${dayListviewBuilderIndex + 1}'] = p0;
-                      log('vfrvr ${p0}');
+                      log('gvbhnj ${controller.selectedActivityForaday}');
+                      for (final ActivityModel acti in p0) {
+                        final ActivityModel activi = controller.activityModel[
+                                'Day ${dayListviewBuilderIndex + 1}']!
+                            .firstWhere(
+                          (ActivityModel element) => element == acti,
+                          orElse: () => ActivityModel(),
+                        );
+                        for (var i = 0; i < controller.days.value; i++) {
+                          controller
+                                  .activitiesForSingleDayName['Day ${i + 1}'] =
+                              <String>[];
+                        }
+                        controller.activitiesForSingleDayName[
+                                'Day ${dayListviewBuilderIndex + 1}']!
+                            .add(activi.activityName.toString());
+                      }
+                      log('vfrvr $p0');
                       final List<String> activityNames = <String>[];
                       log('bnkm,jl ${controller.activitiespaxForItinerary}');
                       for (final ActivityModel ro in p0) {
@@ -570,7 +587,7 @@ class CreateItinerarySection extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18.0, vertical: 8),
                           child: Column(
-                            children: [
+                            children: <Widget>[
                               Row(
                                 children: <Widget>[
                                   Expanded(

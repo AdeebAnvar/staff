@@ -61,6 +61,7 @@ class FollowUpsController extends GetxController
         followup.addAll(newData);
         page++;
       }
+      log('page  : $page');
     }
   }
 

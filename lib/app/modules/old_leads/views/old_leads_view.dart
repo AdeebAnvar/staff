@@ -160,7 +160,7 @@ class OldLeadsView extends GetView<OldLeadsController> {
         ),
         leading: ActionChip(
           label: Text(
-            controller.oldLead[index].customerId.toString(),
+            controller.oldLead[index].cid.toString(),
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white),
           ),

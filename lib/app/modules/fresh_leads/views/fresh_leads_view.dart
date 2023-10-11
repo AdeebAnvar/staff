@@ -163,7 +163,7 @@ class FreshLeadsView extends GetView<FreshLeadsController> {
         ),
         leading: ActionChip(
           label: Text(
-            controller.freshLeads[index].customerId.toString(),
+            controller.freshLeads[index].cid.toString(),
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white),
           ),

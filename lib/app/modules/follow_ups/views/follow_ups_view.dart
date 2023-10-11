@@ -108,7 +108,7 @@ class FollowUpsView extends GetView<FollowUpsController> {
                             children: <Widget>[
                               ListView.separated(
                                 shrinkWrap: true,
-                                physics: AlwaysScrollableScrollPhysics(),
+                                physics: const BouncingScrollPhysics(),
                                 itemCount: controller.followup.length,
                                 itemBuilder:
                                     (BuildContext context, int index) =>
@@ -161,7 +161,7 @@ class FollowUpsView extends GetView<FollowUpsController> {
         ),
         leading: ActionChip(
           label: Text(
-            controller.followup[index].customerId.toString(),
+            controller.followup[index].cid.toString(),
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white),
           ),
