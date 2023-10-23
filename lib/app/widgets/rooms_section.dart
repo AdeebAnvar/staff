@@ -123,8 +123,8 @@ class RoomSection extends StatelessWidget {
               : const SizedBox()),
           Obx(
             () => controller.isGettingRooms.value
-                ? LinearProgressIndicator()
-                : SizedBox(),
+                ? const LinearProgressIndicator()
+                : const SizedBox(),
           ),
           Obx(() => controller.roomModel.isNotEmpty
               ? Padding(
@@ -153,7 +153,7 @@ class RoomSection extends StatelessWidget {
                         //   controller.selectedRoomTypePrices['Night ${i + 1}'] =
                         //       <int>[];
                         // }
-                        log('hbhbh');
+
                         for (final SingleRoomModel element
                             in controller.roomModel) {
                           if (values.contains(element)) {
@@ -217,6 +217,52 @@ class RoomSection extends StatelessWidget {
                                             .toList(),
                                         onConfirm:
                                             (List<SingleRoomModel> values) {
+                                          final List<String> roomIds =
+                                              <String>[];
+                                          log('dcfvde ${controller.roomQuantityForItinerary}');
+
+                                          for (final SingleRoomModel element
+                                              in values) {
+                                            roomIds.add(element.roomId!);
+                                          }
+
+                                          for (int j = 0;
+                                              j < values.length;
+                                              j++) {
+                                            controller.roomQuantityForItinerary[
+                                                    'Night ${nightIndex + 1}']!
+                                                .add(
+                                              <String, String>{'qty': ''},
+                                            );
+                                          }
+                                          for (int j = 0;
+                                              j < values.length;
+                                              j++) {
+                                            controller.roomNameForItinerary[
+                                                    'Night ${nightIndex + 1}']!
+                                                .add(
+                                              <String, String>{'room_name': ''},
+                                            );
+                                          }
+
+                                          log('dcfv qty${controller.roomQuantityForItinerary}');
+                                          log('dcfv name ${controller.roomNameForItinerary}');
+
+                                          final List<Map<String, dynamic>>
+                                              roomList =
+                                              roomIds.map((String roomId) {
+                                            return <String, String?>{
+                                              'room_id': roomId,
+                                              'room_qty': null,
+                                            };
+                                          }).toList();
+
+                                          controller.itinerarySnapshots[
+                                                  'Day ${nightIndex + 1}']![
+                                              'room'] = roomList;
+                                          log(controller.itinerarySnapshots
+                                              .toString());
+
                                           controller.selectedRoomes[
                                                   'Night ${nightIndex + 1}']!
                                               .clear();
@@ -275,37 +321,37 @@ class RoomSection extends StatelessWidget {
                                             keyboardType: TextInputType.number,
                                             labelText: 'Qty',
                                             onChanged: (String value) async {
-                                              // final List<
-                                              //     String> currentRoom = controller
-                                              //             .selectedRoomes[
-                                              //         'Night ${nightIndex + 1}']![
-                                              //     index].;
-                                              // log('grgtds $currentRoom');
-                                              // // Filter out non-empty strings from the list
-                                              // final List<String> filteredItems =
-                                              //     currentRoom
-                                              //         .where((String item) =>
-                                              //             item.isNotEmpty)
-                                              //         .toList();
-
-                                              // final String result =
-                                              //     filteredItems.isNotEmpty
-                                              //         ? filteredItems[0]
-                                              //         : '';
-                                              // final List<String> roomtypes =
-                                              //     <String>[];
-                                              // roomtypes.add(result.trim());
-                                              // final List<String>
-                                              //     roomCategories = <String>[];
-                                              // roomCategories.add(controller
-                                              //     .selectedRoomCategory
-                                              //     .toString());
+                                              controller.roomQuantityForItinerary[
+                                                      'Night ${nightIndex + 1}']![
+                                                  index]['qty'] = value;
+                                              controller.roomNameForItinerary[
+                                                          'Night ${nightIndex + 1}']![
+                                                      index]['room_name'] =
+                                                  '${room.categoryName} ${room.roomType}';
+                                              log('kmkemkr quantity ${controller.roomQuantityForItinerary}');
+                                              log('kmkemkr name ${controller.roomNameForItinerary}');
+                                              final List<Map<String, dynamic>>
+                                                  roomList =
+                                                  controller.itinerarySnapshots[
+                                                              'Day ${nightIndex + 1}']![
+                                                          'room']
+                                                      as List<
+                                                          Map<String, dynamic>>;
+                                              for (final Map<String,
+                                                      dynamic> roomData
+                                                  in roomList) {
+                                                if (roomData['room_id'] ==
+                                                    room.roomId) {
+                                                  roomData['room_qty'] = value;
+                                                  break;
+                                                }
+                                              }
+                                              log(controller.itinerarySnapshots[
+                                                      'Day ${nightIndex + 1}']
+                                                  .toString());
                                               final int count =
                                                   int.parse(value);
-                                              // await controller
-                                              //     .getRooms(
-                                              //         roomtypes, roomCategories)
-                                              //     .then((dynamic e) {
+
                                               final String? price = controller
                                                   .selectedRoomes[
                                                       'Night ${nightIndex + 1}']![
@@ -319,36 +365,21 @@ class RoomSection extends StatelessWidget {
                                                   controller.selectedRoomes[
                                                           'Night ${nightIndex + 1}']![
                                                       index];
-                                              //   log('ITINERARY 1: ${controller.roomsForItinerary}');
-                                              //   controller.roomsForItinerary[
-                                              //           'Night ${nightIndex + 1}'] =
-                                              //       controller
-                                              //           .roomstypesForItinerary[
-                                              //               'Night ${nightIndex + 1}']!
-                                              //           .map((String item) =>
-                                              //               '$item $value rooms')
-                                              //           .toList();
-                                              //   log('ITINERARY t: ${controller.roomstypesForItinerary}');
-                                              //   log('ITINERARY 2: ${controller.roomsForItinerary}');
 
                                               controller.roomPrice[
                                                       'Night ${nightIndex + 1}']
                                                   ?[roomKey.roomBuilding
                                                       .toString()] = sum;
 
-                                              //   log('gtrgt ${controller.roomPrice}');
-                                              // });
                                               for (final SingleRoomModel element
                                                   in controller.selectedRoomes[
                                                       'Night ${nightIndex + 1}']!) {
                                                 controller.roomsForItinerary[
                                                         'Night ${nightIndex + 1}']
                                                     ?.add(
-                                                        '$value ${element.categoryName} ${element.roomType} room ');
+                                                        '$value ${element.categoryName} ${element.roomType} room for ${controller.adults.value} pax');
+                                                log('knijnij ${controller.roomsForItinerary}');
                                               }
-                                              log('jnjnj pri${roomKey.roomPrice}');
-                                              log('jnjnj build${roomKey.roomBuilding}');
-                                              log('jnjnj ${controller.roomPrice['Night ${nightIndex + 1}']}');
                                             },
                                           ),
                                         ),
@@ -366,87 +397,5 @@ class RoomSection extends StatelessWidget {
         ],
       )
     ]);
-  }
-
-  Container selectedRoomcategoryList(CustomBookingController controller) {
-    return Container(
-      height: 70,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: 20),
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: controller.selectedRoomCategories.length,
-        itemBuilder: (BuildContext context, int index) {
-          final int categoryId = controller.selectedRoomCategories[index];
-          log(categoryId.toString());
-          final String? categoryName = controller.roomCategoryModel
-              .firstWhere(
-                  (RoomCategoryModel category) =>
-                      category.catId == categoryId.toString(),
-                  orElse: () => RoomCategoryModel(
-                      catId: categoryId.toString(), catName: ''))
-              .catName;
-          log(categoryName.toString());
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-            child: controller.selectedRoomCategories.isNotEmpty
-                ? Container(
-                    height: 60,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                    ),
-                    child: Center(
-                      child: Text(
-                        categoryName.toString(),
-                        style: paragraph3.copyWith(color: Colors.black),
-                      ),
-                    ),
-                  )
-                : const Text(''),
-          );
-        },
-      ),
-    );
-  }
-
-  SizedBox selectedRoomTypesList(CustomBookingController controller) {
-    return SizedBox(
-      height: 70,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: 20),
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: controller.selectedRoomes.length,
-        itemBuilder: (BuildContext context, int index) {
-          // final List<String> roomTypes = controller.selectedRoomes;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-            child: controller.selectedRoomCategories.isNotEmpty
-                ? Container(
-                    height: 60,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                    ),
-                    child: Center(
-                      child: Text(
-                        roomTypes[index],
-                        style: paragraph3.copyWith(color: Colors.black),
-                      ),
-                    ),
-                  )
-                : const Text(''),
-          );
-        },
-      ),
-    );
   }
 }

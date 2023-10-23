@@ -6,6 +6,9 @@ import 'package:get/get.dart';
 import '../../../../core/telecalling_icons_icons.dart';
 import '../../../../core/theme/style.dart';
 import '../../../../core/utils/constants.dart';
+import '../../../../core/utils/date_utils.dart';
+import '../../../../core/utils/string_utils.dart';
+import '../../../data/models/network_models/bookings_model.dart';
 import '../../../widgets/custom_appBar.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_date_picker.dart';
@@ -21,7 +24,7 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: Text('Profile View'),
+        title: const Text('Profile View'),
       ),
       body: controller.obx(
         onLoading: const CustomLoadingScreen(),
@@ -86,23 +89,27 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
               ),
             ),
             const SizedBox(height: 60),
-            buildTile(
-              label: 'Total Points Earned',
-              icon: const Icon(TelecallingIcons.chart_box, color: Colors.white),
-              trailing: controller.teleCallerAnalytics.value.points.toString(),
-              children: <Widget>[buildTotalPointsEarnedSection()],
-              onTap: () {},
-            ),
+            if (controller.isTelecallingStaff.value)
+              buildTile(
+                label: 'Bookings',
+                icon: const Icon(Icons.confirmation_num_rounded,
+                    color: Colors.white),
+                onTap: () {},
+                children: <Widget>[buildTotalBookingEarnedSection()],
+              ),
             const SizedBox(height: 10),
-            // buildTile(
-            //   label: 'Total Bookings',
-            //   trailing: '2000',
-            //   icon: const Icon(Icons.confirmation_num_rounded,
-            //       color: Colors.white),
-            //   onTap: () {},
-            //   children: <Widget>[buildTotalBookingEarnedSection()],
-            // ),
+            if (controller.isTelecallingStaff.value)
+              buildTile(
+                label: 'Analytics',
+                icon:
+                    const Icon(TelecallingIcons.chart_box, color: Colors.white),
+                children: <Widget>[buildTotalPointsEarnedSection()],
+                onTap: () {},
+              )
+            else
+              const SizedBox(),
             const SizedBox(height: 10),
+
             buildTile(
                 label: 'Leave Request',
                 icon: const Icon(Icons.edit_calendar_rounded,
@@ -129,10 +136,12 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
               onTap: () {},
             ),
             // Spacer(),
-            Image.network(
-              controller.telecallerData[0].depImage.toString(),
-              height: 150,
-            )
+            Obx(() {
+              return Image.network(
+                controller.telecallerData[0].depImage.toString(),
+                height: 150,
+              );
+            })
           ],
         ),
       ),
@@ -189,6 +198,11 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
             points:
                 controller.teleCallerAnalytics.value.targetPoints.toString(),
             tourCode: 'Target point',
+          ),
+          buildPointsTableRow(
+            date: ':',
+            points: controller.teleCallerAnalytics.value.points.toString(),
+            tourCode: 'Points earned',
           ),
           buildPointsTableRow(
             date: ':',
@@ -260,47 +274,62 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
 
   Padding buildTotalBookingEarnedSection() {
     return Padding(
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        children: <Widget>[
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-          buildPointsTableRow(
-            date: '23/04/2001',
-            points: '150',
-            tourCode: 'K2KC',
-          ),
-        ],
-      ),
-    );
+        padding: const EdgeInsets.all(10),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: controller.teleCallerBookings.length,
+          itemBuilder: (BuildContext context, int index) {
+            final BookingsModel data = controller.teleCallerBookings[index];
+            return Container(
+              decoration:
+                  BoxDecoration(border: Border.all(color: Colors.white)),
+              child: Card(
+                elevation: 4,
+                color: getColorFromHex(depColor),
+                child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('Customer ID   : ${data.customerId}',
+                              style: subheading2.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('Tour          : ${data.tourName}',
+                              style: subheading2.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                              'Booking Date  : ${data.bookingDate.toString().parseFromIsoDate().toDatewithMonthFormat()}',
+                              style: subheading2.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('Points earned : ${data.points}',
+                              style: subheading2.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ));
   }
 
   Widget buildLeaveRequestTable() {

@@ -25,6 +25,9 @@ abstract class Routes {
   static const String PREVIOUS_BOOKINGS = _Paths.PREVIOUS_BOOKINGS;
   static const FIXED_ITINERARIES = _Paths.FIXED_ITINERARIES;
   static const OLD_LEADS = _Paths.OLD_LEADS;
+  static const CUSTOM_ITINERARY = _Paths.CUSTOM_ITINERARY;
+  static const SINGLE_SNAPSHOT = _Paths.SINGLE_SNAPSHOT;
+  static const PDF = _Paths.PDF;
 }
 
 abstract class _Paths {
@@ -50,4 +53,7 @@ abstract class _Paths {
   static const String PREVIOUS_BOOKINGS = '/previous-bookings';
   static const FIXED_ITINERARIES = '/fixed-itineraries';
   static const OLD_LEADS = '/old-leads';
+  static const CUSTOM_ITINERARY = '/custom-itinerary';
+  static const SINGLE_SNAPSHOT = '/single-snapshot';
+  static const PDF = '/pdf';
 }

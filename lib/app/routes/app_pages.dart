@@ -8,6 +8,8 @@ import '../modules/category_wise_leads/bindings/category_wise_leads_binding.dart
 import '../modules/category_wise_leads/views/category_wise_leads_view.dart';
 import '../modules/custom_booking/bindings/custom_booking_binding.dart';
 import '../modules/custom_booking/views/custom_booking_view.dart';
+import '../modules/custom_itinerary/bindings/custom_itinerary_binding.dart';
+import '../modules/custom_itinerary/views/custom_itinerary_view.dart';
 import '../modules/custombookingcalculation/bindings/custombookingcalculation_binding.dart';
 import '../modules/custombookingcalculation/views/custombookingcalculation_view.dart';
 import '../modules/fixed_itineraries/bindings/fixed_itineraries_binding.dart';
@@ -28,6 +30,8 @@ import '../modules/no_internet/bindings/no_internet_binding.dart';
 import '../modules/no_internet/views/no_internet_view.dart';
 import '../modules/old_leads/bindings/old_leads_binding.dart';
 import '../modules/old_leads/views/old_leads_view.dart';
+import '../modules/pdf/bindings/pdf_binding.dart';
+import '../modules/pdf/views/pdf_view.dart';
 import '../modules/pdf_viewer_page/bindings/pdf_viewer_page_binding.dart';
 import '../modules/pdf_viewer_page/views/pdf_viewer_page_view.dart';
 import '../modules/previous_bookings/bindings/previous_bookings_binding.dart';
@@ -38,6 +42,8 @@ import '../modules/single_booking_details/bindings/single_booking_details_bindin
 import '../modules/single_booking_details/views/single_booking_details_view.dart';
 import '../modules/single_lead/bindings/single_lead_binding.dart';
 import '../modules/single_lead/views/single_lead_view.dart';
+import '../modules/single_snapshot/bindings/single_snapshot_binding.dart';
+import '../modules/single_snapshot/views/single_snapshot_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
 import '../modules/telecaller_profile/bindings/telecaller_profile_binding.dart';
@@ -161,6 +167,21 @@ class AppPages {
       name: _Paths.OLD_LEADS,
       page: () => const OldLeadsView(),
       binding: OldLeadsBinding(),
+    ),
+    GetPage(
+      name: _Paths.CUSTOM_ITINERARY,
+      page: () => CustomItineraryView(),
+      binding: CustomItineraryBinding(),
+    ),
+    GetPage(
+      name: _Paths.SINGLE_SNAPSHOT,
+      page: () => const SingleSnapshotView(),
+      binding: SingleSnapshotBinding(),
+    ),
+    GetPage(
+      name: _Paths.PDF,
+      page: () => const PdfView(),
+      binding: PdfBinding(),
     ),
   ];
 }

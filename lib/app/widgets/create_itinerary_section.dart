@@ -53,7 +53,7 @@ class CreateItinerarySection extends StatelessWidget {
                   color: getColorFromHex(depColor)!),
               const SizedBox(height: 20),
               Obx(() => CustomButton().showBlueButton(
-                  onTap: () => controller.createItineraryPDF(),
+                  onTap: () => controller.createItineraryPDF(controller),
                   isLoading: controller.generatingPDF.value,
                   label: 'Generate Itinerary',
                   color: getColorFromHex(depColor)!))
@@ -301,11 +301,22 @@ class CreateItinerarySection extends StatelessWidget {
                           MultiSelectItem<PlacesModel>(e, e.placeName!))
                       .toList(),
                   title: const Text('Select Places'),
-                  buttonText: Text('Select places',
-                      style: subheading2.copyWith(
-                          color: getColorFromHex(depColor))),
+                  buttonText: Text(
+                    'Select places',
+                    style: subheading2.copyWith(
+                      color: getColorFromHex(depColor),
+                    ),
+                  ),
                   onConfirm: (List<PlacesModel> p0) async {
                     log('hbknm,. ${p0[0].placeName}');
+                    controller.isFetchingData[
+                        'Day ${dayListviewBuilderIndex + 1}'] = true;
+
+                    controller.itinerarySnapshots[
+                        'Day ${dayListviewBuilderIndex + 1}']!['place_id'] = [
+                      p0[0].placeId
+                    ];
+                    log('ghnjm, ${controller.itinerarySnapshots['Day ${dayListviewBuilderIndex + 1}']!['place_id']}');
                     if (p0.length == 1) {
                       for (int i = 0; i < controller.placesModel.length; i++) {
                         for (final PlacesModel place in p0) {
@@ -389,10 +400,16 @@ class CreateItinerarySection extends StatelessWidget {
                           'Day ${dayListviewBuilderIndex + 1}'] = placesNames;
                       controller.placesForItinerary[
                           'Day ${dayListviewBuilderIndex + 1}'] = p0[0];
-                      await controller.getActivities(controller.placeId,
-                          'Day ${dayListviewBuilderIndex + 1}');
-                      await controller.getAddons(controller.placeId,
-                          'Day ${dayListviewBuilderIndex + 1}');
+                      await controller.getActivities(
+                          controller.placeId,
+                          'Day ${dayListviewBuilderIndex + 1}',
+                          dayListviewBuilderIndex);
+                      await controller.getAddons(
+                          controller.placeId,
+                          'Day ${dayListviewBuilderIndex + 1}',
+                          dayListviewBuilderIndex);
+                      controller.isFetchingData[
+                          'Day ${dayListviewBuilderIndex + 1}'] = false;
                       controller.update(<int>[dayListviewBuilderIndex]);
                     }
                   },
@@ -400,95 +417,113 @@ class CreateItinerarySection extends StatelessWidget {
               ),
               const SizedBox(height: 15),
 
-              /// VEHICLES
+              Obx(() {
+                if (controller
+                    .isFetchingData['Day ${dayListviewBuilderIndex + 1}']!) {
+                  return const Center(
+                      child: Row(
+                    children: <Widget>[
+                      Text('Please Wait . . . '),
+                      CircularProgressIndicator(),
+                    ],
+                  ));
+                } else {
+                  return const SizedBox();
+                }
+              }),
 
-              // Padding(
-              //   padding:
-              //       const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
-              //   child: MultiSelectDialogField<SingleVehicleModel>(
-              //     listType: MultiSelectListType.CHIP,
-              //     chipDisplay: MultiSelectChipDisplay<SingleVehicleModel>(
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //     ),
-              //     buttonIcon: const Icon(Icons.arrow_downward,
-              //         color: Colors.transparent),
-              //     decoration: BoxDecoration(
-              //         color: getColorFromHex(depColor),
-              //         borderRadius: BorderRadius.circular(10)),
-              //     itemsTextStyle: paragraph2,
-              //     searchable: true,
-              //     selectedColor: getColorFromHex(depColor),
-              //     autovalidateMode: AutovalidateMode.onUserInteraction,
-              //     selectedItemsTextStyle:
-              //         paragraph2.copyWith(color: Colors.white),
-              //     items: controller.selectedVehicleForDropDown
-              //         .map((SingleVehicleModel e) =>
-              //             MultiSelectItem<SingleVehicleModel>(
-              //                 e, e.vehicleName!))
-              //         .toList(),
-              //     title: const Text('Select vehicle'),
-              //     buttonText: Text(
-              //       'Select vehicle',
-              //       style: subheading2.copyWith(color: Colors.white),
-              //     ),
-              //     onConfirm: (List<SingleVehicleModel> p0) {
-              //       log('njmd $p0');
-              //       controller.selectedVehicleForaday[
-              //           'Day ${dayListviewBuilderIndex + 1}'] = p0;
-              //     },
-              //   ),
-              // ),
-              // const SizedBox(height: 15),
+              /// ADDONS
 
-              /// ROOMS
+              if (controller
+                          .addonsModel['Day ${dayListviewBuilderIndex + 1}'] !=
+                      null &&
+                  controller.addonsModel['Day ${dayListviewBuilderIndex + 1}']!
+                      .isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 2.0, horizontal: 10.0),
+                  child: MultiSelectDialogField<AddonsModel>(
+                    listType: MultiSelectListType.CHIP,
+                    buttonIcon: const Icon(Icons.arrow_downward,
+                        color: Colors.transparent),
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(10)),
+                    itemsTextStyle: paragraph2,
+                    searchable: true,
+                    selectedColor: getColorFromHex(depColor),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    selectedItemsTextStyle:
+                        paragraph2.copyWith(color: Colors.white),
+                    chipDisplay: MultiSelectChipDisplay<AddonsModel>(
+                      onTap: (AddonsModel p0) {
+                        log('hjbnkm $p0');
+                      },
+                    ),
+                    items: controller
+                        .addonsModel['Day ${dayListviewBuilderIndex + 1}']!
+                        .map((AddonsModel e) =>
+                            MultiSelectItem<AddonsModel>(e, e.addonName!))
+                        .toList(),
+                    title: const Text('Select addons'),
+                    buttonText: Text(
+                      'Select addons',
+                      style: subheading2.copyWith(
+                        color: getColorFromHex(depColor),
+                      ),
+                    ),
+                    onConfirm: (List<AddonsModel> p0) async {
+                      final List<String> addonids = <String>[];
+                      for (final AddonsModel addon in p0) {
+                        final AddonsModel matchingAddon = controller
+                            .addonsModel['Day ${dayListviewBuilderIndex + 1}']!
+                            .firstWhere(
+                                (AddonsModel element) => element == addon,
+                                orElse: () => AddonsModel());
 
-              // Padding(
-              //   padding:
-              //       const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
-              //   child: MultiSelectDialogField<SingleRoomModel>(
-              //     listType: MultiSelectListType.CHIP,
-              //     chipDisplay: MultiSelectChipDisplay<SingleRoomModel>(
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //     ),
-              //     buttonIcon: const Icon(Icons.arrow_downward,
-              //         color: Colors.transparent),
-              //     decoration: BoxDecoration(
-              //         color: getColorFromHex(depColor),
-              //         borderRadius: BorderRadius.circular(10)),
-              //     itemsTextStyle: paragraph2,
-              //     searchable: true,
-              //     selectedColor: getColorFromHex(depColor),
-              //     autovalidateMode: AutovalidateMode.onUserInteraction,
-              //     selectedItemsTextStyle:
-              //         paragraph2.copyWith(color: Colors.white),
-              //     items: controller.selectedRoomsForDropDown
-              //         .map((SingleRoomModel e) =>
-              //             MultiSelectItem<SingleRoomModel>(e, e.roomBuilding!))
-              //         .toList(),
-              //     title: const Text('Select Room'),
-              //     buttonText: Text('Select room',
-              //         style: subheading2.copyWith(color: Colors.white)),
-              //     onConfirm: (List<SingleRoomModel> p0) {
-              //       controller.selectedRoomForaday[
-              //           'Day ${dayListviewBuilderIndex + 1}'] = p0;
-              //       log(p0.toString());
-              //       final List<String> roomCosts = <String>[];
-              //       for (final SingleRoomModel ro in p0) {
-              //         roomCosts.add(ro.roomPrice.toString());
-              //       }
-              //       controller.selectedRoomCostsForaday[
-              //           'Day ${dayListviewBuilderIndex + 1}'] = roomCosts;
-              //       log(controller.selectedRoomCostsForaday.toString());
-              //     },
-              //   ),
-              // ),
-              // const SizedBox(height: 15),
+                        if (matchingAddon != null) {
+                          addonids.add(matchingAddon.addonId.toString());
+                        }
+                      }
+                      controller.itinerarySnapshots[
+                              'Day ${dayListviewBuilderIndex + 1}']!['addons'] =
+                          addonids;
+                      log('jkm,l ${controller.itinerarySnapshots['Day ${dayListviewBuilderIndex + 1}']}');
 
-              /// ACTIVITY
+                      List<String> vehicleNames = <String>[];
+                      List<int> vehicleQty = <int>[];
+                      vehicleNames = controller
+                          .vehicleQuantity[
+                              'Day ${dayListviewBuilderIndex + 1}']!
+                          .keys
+                          .toList();
+                      log('uunuu $vehicleNames');
+                      vehicleQty = controller
+                          .vehicleQuantity[
+                              'Day ${dayListviewBuilderIndex + 1}']!
+                          .values
+                          .toList();
+
+                      await controller.getVehiclePricesinAddons(addonids,
+                          vehicleNames, vehicleQty, dayListviewBuilderIndex);
+
+                      controller.selectedAddonsForaday[
+                          'Day ${dayListviewBuilderIndex + 1}'] = p0;
+                      final List<String> addonNames = <String>[];
+                      for (final AddonsModel ro in p0) {
+                        addonNames.add(ro.addonName.toString());
+                      }
+                      controller.addonsForSingleDayName[
+                          'Day ${dayListviewBuilderIndex + 1}'] = addonNames;
+                      controller.addonsForItinerary[
+                          'Day ${dayListviewBuilderIndex + 1}'] = p0;
+                      log('gbhjnkm ${controller.addonsForItinerary['Day ${dayListviewBuilderIndex + 1}']!.map((AddonsModel e) => e.addonDes).join(' and ')}');
+                      log('gbhjnkm ${controller.addonsForItinerary}');
+                    },
+                  ),
+                ),
+
+              // ACTIVITES
 
               if (controller.activityModel[
                           'Day ${dayListviewBuilderIndex + 1}'] !=
@@ -533,6 +568,24 @@ class CreateItinerarySection extends StatelessWidget {
                           color: getColorFromHex(depColor)),
                     ),
                     onConfirm: (List<ActivityModel> p0) {
+                      final List<String> activityIds = <String>[];
+
+                      log('hiiihihi $activityIds');
+                      for (final ActivityModel element in p0) {
+                        activityIds.add(element.activityId!);
+                      }
+                      final List<Map<String, dynamic>> activityList =
+                          activityIds.map((String activityId) {
+                        return <String, String?>{
+                          'activity_id': activityId,
+                          'activity_qty': null,
+                        };
+                      }).toList();
+
+                      controller.itinerarySnapshots[
+                              'Day ${dayListviewBuilderIndex + 1}']![
+                          'activity'] = activityList;
+
                       controller.selectedActivityForaday[
                           'Day ${dayListviewBuilderIndex + 1}'] = p0;
                       log('gvbhnj ${controller.selectedActivityForaday}');
@@ -543,7 +596,7 @@ class CreateItinerarySection extends StatelessWidget {
                           (ActivityModel element) => element == acti,
                           orElse: () => ActivityModel(),
                         );
-                        for (var i = 0; i < controller.days.value; i++) {
+                        for (int i = 0; i < controller.days.value; i++) {
                           controller
                                   .activitiesForSingleDayName['Day ${i + 1}'] =
                               <String>[];
@@ -562,9 +615,14 @@ class CreateItinerarySection extends StatelessWidget {
                             .add(ro.activityName.toString());
                       }
 
+                      for (var i = 0; i < p0.length; i++) {
+                        controller.activitiesQuantityForItinerary[
+                                'Day ${dayListviewBuilderIndex + 1}']!
+                            .add({'qty': ''});
+                      }
                       controller.activitiesForItinerary[
                           'Day ${dayListviewBuilderIndex + 1}'] = p0;
-                      log('bnkm,l ${controller.activitiespaxForItinerary}');
+                      log('bnkm,l ${controller.activitiesForItinerary}');
                     },
                   ),
                 ),
@@ -609,6 +667,30 @@ class CreateItinerarySection extends StatelessWidget {
                                     child: CustomTextFormField(
                                       labelText: 'Pax',
                                       onChanged: (String value) {
+                                        controller.activitiesQuantityForItinerary[
+                                                'Day ${dayListviewBuilderIndex + 1}']![
+                                            index]['qty'] = value;
+                                        final List<
+                                            Map<String,
+                                                dynamic>> activityList = controller
+                                                        .itinerarySnapshots[
+                                                    'Day ${dayListviewBuilderIndex + 1}']![
+                                                'activity']
+                                            as List<Map<String, dynamic>>;
+                                        for (final Map<String,
+                                                dynamic> activityData
+                                            in activityList) {
+                                          if (activityData['activity_id'] ==
+                                              controller
+                                                  .selectedActivityForaday[
+                                                      'Day ${dayListviewBuilderIndex + 1}']
+                                                      ?[index]
+                                                  .activityId) {
+                                            activityData['activity_qty'] =
+                                                value;
+                                            break;
+                                          }
+                                        }
                                         final String dayKey =
                                             'Day ${dayListviewBuilderIndex + 1}';
                                         final num? activityPrice = controller
@@ -642,126 +724,6 @@ class CreateItinerarySection extends StatelessWidget {
                     )
                   : const SizedBox()),
 
-              /// ADDONS
-
-              if (controller
-                          .addonsModel['Day ${dayListviewBuilderIndex + 1}'] !=
-                      null &&
-                  controller.addonsModel['Day ${dayListviewBuilderIndex + 1}']!
-                      .isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 2.0, horizontal: 10.0),
-                  child: MultiSelectDialogField<AddonsModel>(
-                    listType: MultiSelectListType.CHIP,
-                    buttonIcon: const Icon(Icons.arrow_downward,
-                        color: Colors.transparent),
-                    decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(10)),
-                    itemsTextStyle: paragraph2,
-                    searchable: true,
-                    selectedColor: getColorFromHex(depColor),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    selectedItemsTextStyle:
-                        paragraph2.copyWith(color: Colors.white),
-                    chipDisplay: MultiSelectChipDisplay<AddonsModel>(
-                      onTap: (AddonsModel p0) {
-                        log('hjbnkm ${p0.toString()}');
-                      },
-                    ),
-                    items: controller
-                        .addonsModel['Day ${dayListviewBuilderIndex + 1}']!
-                        .map((AddonsModel e) =>
-                            MultiSelectItem<AddonsModel>(e, e.addonName!))
-                        .toList(),
-                    title: const Text('Select addons'),
-                    buttonText: Text(
-                      'Select addons',
-                      style: subheading2.copyWith(
-                        color: getColorFromHex(depColor),
-                      ),
-                    ),
-                    onConfirm: (List<AddonsModel> p0) async {
-                      final List<String> addonids = <String>[];
-                      for (final AddonsModel addon in p0) {
-                        final AddonsModel matchingAddon = controller
-                            .addonsModel['Day ${dayListviewBuilderIndex + 1}']!
-                            .firstWhere(
-                                (AddonsModel element) => element == addon,
-                                orElse: () => AddonsModel());
-
-                        if (matchingAddon != null) {
-                          addonids.add(matchingAddon.addonId.toString());
-                        }
-                      }
-
-                      log(addonids.toString());
-
-                      List<String> vehicleNames = <String>[];
-                      List<int> vehicleQty = <int>[];
-                      vehicleNames = controller
-                          .vehicleQuantity[
-                              'Day ${dayListviewBuilderIndex + 1}']!
-                          .keys
-                          .toList();
-                      log('uunuu $vehicleNames');
-                      vehicleQty = controller
-                          .vehicleQuantity[
-                              'Day ${dayListviewBuilderIndex + 1}']!
-                          .values
-                          .toList();
-
-                      await controller.getVehiclePricesinAddons(addonids,
-                          vehicleNames, vehicleQty, dayListviewBuilderIndex);
-
-                      controller.selectedAddonsForaday[
-                          'Day ${dayListviewBuilderIndex + 1}'] = p0;
-                      final List<String> addonNames = <String>[];
-                      for (final AddonsModel ro in p0) {
-                        addonNames.add(ro.addonName.toString());
-                      }
-                      controller.addonsForSingleDayName[
-                          'Day ${dayListviewBuilderIndex + 1}'] = addonNames;
-                      controller.addonsForItinerary[
-                          'Day ${dayListviewBuilderIndex + 1}'] = p0;
-                    },
-                  ),
-                ),
-
-              /// FOOD
-              // if (controller.foodModel.isNotEmpty)
-              //   Padding(
-              //     padding: const EdgeInsets.symmetric(
-              //         vertical: 2.0, horizontal: 10.0),
-              //     child: MultiSelectDialogField<FoodModel>(
-              //       listType: MultiSelectListType.CHIP,
-              //       buttonIcon: const Icon(Icons.arrow_downward,
-              //           color: Colors.transparent),
-              //       decoration: BoxDecoration(
-              //           color: getColorFromHex(depColor),
-              //           borderRadius: BorderRadius.circular(10)),
-              //       itemsTextStyle: paragraph2,
-              //       searchable: true,
-              //       selectedColor: getColorFromHex(depColor),
-              //       autovalidateMode: AutovalidateMode.onUserInteraction,
-              //       selectedItemsTextStyle:
-              //           paragraph2.copyWith(color: Colors.white),
-              //       items: controller.foodModel
-              //           .map((FoodModel e) =>
-              //               MultiSelectItem<FoodModel>(e, e.foodType!))
-              //           .toList(),
-              //       title: const Text('Select Food'),
-              //       buttonText: Text('Select Food',
-              //           style: subheading2.copyWith(color: Colors.white)),
-              //       onConfirm: (List<FoodModel> p0) {
-              //         controller.selectedFoodForaday[
-              //             'Day ${dayListviewBuilderIndex + 1}'] = p0;
-              //       },
-              //     ),
-              //   )
-              // else
-              //   const SizedBox(),
               const SizedBox(height: 30),
             ],
           ),

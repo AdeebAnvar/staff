@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 
 import '../../../services/dio_client.dart';
+import '../../models/network_models/bookings_model.dart';
 import '../../models/network_models/leave_request_model.dart';
 import '../../models/network_models/leave_status_model.dart';
 import '../../models/network_models/telecaller_analytics_model.dart';
@@ -33,7 +34,30 @@ class TelecallerRepository {
       return ApiResponse<List<TeleCallerModel>>.error(e.toString());
     }
   }
-//00:07:95
+
+  Future<ApiResponse<List<BookingsModel>>> getTelecallerBookings() async {
+    try {
+      final Map<String, dynamic>? authHeader = await Client().getAuthHeader();
+      final Response<Map<String, dynamic>> res = await dio.getUri(
+          Uri.parse('bookings/telecaller'),
+          options: Options(headers: authHeader));
+      log('Adeeb rep ${res.data!['result']}');
+      log('Adeeb rep ${res.statusMessage}');
+      if (res.statusCode == 200) {
+        final List<BookingsModel> bookings =
+            (res.data!['result'] as List<dynamic>).map((dynamic e) {
+          return BookingsModel.fromJson(e as Map<String, dynamic>);
+        }).toList();
+        return ApiResponse<List<BookingsModel>>.completed(bookings);
+      } else {
+        return ApiResponse<List<BookingsModel>>.error(res.statusMessage);
+      }
+    } on DioException catch (de) {
+      return ApiResponse<List<BookingsModel>>.error(de.error.toString());
+    } catch (e) {
+      return ApiResponse<List<BookingsModel>>.error(e.toString());
+    }
+  }
 
   Future<ApiResponse<TeleCallerAnalytics>>
       getTelecallerAnalyticsDetails() async {

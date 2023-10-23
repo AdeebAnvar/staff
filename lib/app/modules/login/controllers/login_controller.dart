@@ -70,6 +70,7 @@ class LoginController extends GetxController {
         final User? user = FirebaseAuth.instance.currentUser;
         final String? toke = await user!.getIdToken(true);
         await storage.write('token', toke);
+
         log(toke.toString());
         Get.offAllNamed(Routes.HOME);
         emailError.value = '';

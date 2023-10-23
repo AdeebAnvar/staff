@@ -66,10 +66,7 @@ class HomeController extends GetxController
     depColor = telecallerData[0].depColor!;
     storage.write('depImage', telecallerData[0].depImage);
     teleCallerAnalytics.value = await getTelecallerAnalytics();
-    // leadData.value = await getLeadData();
-    // followUps.value = await getFollowUps();
-    // oldLeads.value = await getOldLeads();
-    // fieldStaffBookingModel.value = (await getFieldStaffBookings())!;
+    fieldStaffBookingModel.value = (await getFieldStaffBookings())!;
 
     change(null, status: RxStatus.success());
   }
@@ -165,6 +162,7 @@ class HomeController extends GetxController
     }
   }
 
-  void onTapSingleBooking(String? bookingId) =>
-      Get.toNamed(Routes.SINGLE_BOOKING_DETAILS, arguments: bookingId);
+  void onTapSingleBooking(FieldStaffBookingModel? fieldStaffBookingModel) =>
+      Get.toNamed(Routes.SINGLE_BOOKING_DETAILS,
+          arguments: <FieldStaffBookingModel?>[fieldStaffBookingModel]);
 }

@@ -6,6 +6,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/utils/constants.dart';
+import '../../../data/models/network_models/bookings_model.dart';
 import '../../../data/models/network_models/leave_request_model.dart';
 import '../../../data/models/network_models/telecaller_analytics_model.dart';
 import '../../../data/models/network_models/telecaller_model.dart';
@@ -24,14 +25,15 @@ class TelecallerProfileController extends GetxController
   String leaveEndDate = '';
   String haldayLeaveDate = '';
   String reason = '';
+  RxBool isTelecallingStaff = true.obs;
   RxList<TeleCallerModel> telecallerData = <TeleCallerModel>[].obs;
   Rx<TeleCallerAnalytics> teleCallerAnalytics = TeleCallerAnalytics().obs;
+  RxList<BookingsModel> teleCallerBookings = <BookingsModel>[].obs;
 
   @override
   Future<void> onInit() async {
     super.onInit();
     await loadData();
-    log(' gruinjkm  $depColor');
   }
 
   void fullDayLeave() {
@@ -57,10 +59,13 @@ class TelecallerProfileController extends GetxController
     try {
       final ApiResponse<List<TeleCallerModel>> res =
           await TelecallerRepository().getTelecallerDetails();
-      log('fghujnkmiu./ ${res.message}');
       if (res.data != null) {
         telecallerData.value = res.data!;
+        if (telecallerData[0].userType != 'telecaller') {
+          isTelecallingStaff.value = false;
+        }
         teleCallerAnalytics.value = await getTelecallerAnalytics();
+        await getTelecallerBookings();
         log('fghujnkm,l./');
         change(null, status: RxStatus.success());
       } else {
@@ -133,5 +138,19 @@ class TelecallerProfileController extends GetxController
   Future<void> onCallITSupport() async {
     const String number = '+918138949909';
     await FlutterPhoneDirectCaller.callNumber(number);
+  }
+
+  Future<void> getTelecallerBookings() async {
+    try {
+      await TelecallerRepository()
+          .getTelecallerBookings()
+          .then((ApiResponse<List<BookingsModel>> res) {
+        if (res.data != null) {
+          teleCallerBookings.value = res.data!;
+        }
+      });
+    } catch (e) {
+      log(e.toString());
+    }
   }
 }

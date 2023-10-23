@@ -115,18 +115,9 @@ class FixedItinerariesController extends GetxController
   void onChangeSearchValue(String text) {
     if (text.isNotEmpty) {
       toursData.value = toursDatas
-          .where(
-            (TourModel tour) => tour.tourName!.toLowerCase().contains(
-                  text.toLowerCase(),
-                ),
-          )
-          .toList();
-      toursData.value = toursDatas
-          .where(
-            (TourModel tour) => tour.tourCode!.toLowerCase().contains(
-                  text.toLowerCase(),
-                ),
-          )
+          .where((TourModel tour) =>
+              tour.tourName!.toLowerCase().contains(text.toLowerCase()) ||
+              tour.tourCode!.toLowerCase().contains(text.toLowerCase()))
           .toList();
     } else {
       toursData.value = toursDatas;

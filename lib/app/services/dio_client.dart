@@ -3,16 +3,28 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'dio_connnecticity_retryer.dart';
 
 class Client {
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   GetStorage storage = GetStorage();
   Dio init({String baseUrl = 'https://serverless-79rz.vercel.app/'}) {
     final Dio dio = Dio();
-
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest:
+          (RequestOptions options, RequestInterceptorHandler handler) async {
+        await auth.currentUser!.getIdToken(true).then((String? value) async {
+          await storage.write('token', value);
+        });
+        log('messagerdvfc');
+        handler.next(options);
+      },
+    ));
     dio.interceptors.add(
       PrettyDioLogger(
         requestHeader: true,
@@ -20,6 +32,7 @@ class Client {
         maxWidth: 180,
       ),
     );
+
     dio.interceptors.add(
       RetryOnConnectionChangeInterceptor(
         requestRetryer: DioConnectivityRequestRetryer(

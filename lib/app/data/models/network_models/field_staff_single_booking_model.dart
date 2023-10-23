@@ -1,47 +1,35 @@
 class FieldStaffSingleBookingModel {
+  String? taskId;
+  String? task;
+  String? status;
+  String? reason;
+  String? dayId;
+  String? imageKey;
+
   FieldStaffSingleBookingModel(
-      {this.bookingId,
-      this.userName,
-      this.bookingDate,
-      this.customerName,
-      this.amountPaid,
-      this.amountPayable,
-      this.travelItinerary});
-  String? bookingId;
-  String? userName;
-  String? bookingDate;
-  String? customerName;
-  String? amountPaid;
-  String? amountPayable;
-  String? travelItinerary;
+      {this.taskId,
+      this.task,
+      this.status,
+      this.reason,
+      this.dayId,
+      this.imageKey});
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'booking_id': bookingId,
-        'user_name': userName,
-        'booking_date': bookingDate,
-        'customer_name': customerName,
-        'amount_paid': amountPaid,
-        'amount_payable': amountPayable,
-        'travel_itinerary': travelItinerary,
+        'task_id': taskId,
+        'task': task,
+        'status': status,
+        'reason': reason,
+        'day_id': dayId,
+        'image_key': imageKey,
       };
 
   static FieldStaffSingleBookingModel fromJson(Map<String, dynamic> json) =>
       FieldStaffSingleBookingModel(
-        bookingId:
-            json['booking_id'] == null ? '' : json['booking_id'] as String,
-        userName: json['user_name'] == null ? '' : json['user_name'] as String,
-        bookingDate:
-            json['booking_date'] == null ? '' : json['booking_date'] as String,
-        customerName: json['customer_name'] == null
-            ? ''
-            : json['customer_name'] as String,
-        amountPaid:
-            json['amount_paid'] == null ? '' : json['amount_paid'] as String,
-        amountPayable: json['amount_payable'] == null
-            ? ''
-            : json['amount_payable'] as String,
-        travelItinerary: json['travel_itinerary'] == null
-            ? ''
-            : json['travel_itinerary'] as String,
+        taskId: json['task_id'] == null ? '' : json['task_id'] as String,
+        task: json['task'] == null ? '' : json['task'] as String,
+        status: json['status'] == null ? '' : json['status'] as String,
+        reason: json['reason'] == null ? '' : json['reason'] as String,
+        dayId: json['day_id'] == null ? '' : json['day_id'] as String,
+        imageKey: json['image_key'] == null ? '' : json['image_key'] as String,
       );
 }

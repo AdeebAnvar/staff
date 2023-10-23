@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:ffi';
 
 import 'package:dio/dio.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../../../services/dio_client.dart';
@@ -363,13 +366,67 @@ class CustomBookingRepo {
     }
   }
 
-  Future<ApiResponse<Map<String, dynamic>>> postSnapshots(
-      SnapShotModel snapShotModel) async {
+  Future<ApiResponse<Map<String, dynamic>>> postSnapshots({
+    required List<String> tourIds,
+    required String tourStartingDate,
+    required String tourEndingDate,
+    required String day,
+    required String night,
+    required String adult,
+    required String cid,
+    required String kid,
+    required String infant,
+    required List<Map<String, dynamic>> data,
+  }) async {
     try {
       final Map<String, dynamic>? authHeader = await Client().getAuthHeader();
+      log(authHeader!.values.toString());
+      final Response<Map<String, dynamic>> res =
+          await dio.postUri(Uri.parse('snapshots'),
+              data: <String, Object>{
+                'tour_id': tourIds,
+                'start_date': tourStartingDate,
+                'end_date': tourEndingDate,
+                'day': day,
+                'night': night,
+                'adult': adult,
+                'customer_id': cid,
+                'kid': kid,
+                'infant': infant,
+                'data': data,
+              },
+              options: Options(headers: authHeader));
+      if (res.statusCode == 200) {
+        return ApiResponse<Map<String, dynamic>>.completed(res.data);
+      } else {
+        return ApiResponse<Map<String, dynamic>>.error(res.statusMessage);
+      }
+    } on DioException catch (de) {
+      return ApiResponse<Map<String, dynamic>>.error(de.error.toString());
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>.error(e.toString());
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> postProposals({
+    required String cid,
+    required String pdf,
+  }) async {
+    try {
+      final Map<String, dynamic>? authHeader =
+          await Client().getMultiPartAuthHeader();
+      log(authHeader!.values.toString());
+      final FormData formData = FormData.fromMap(<String, dynamic>{
+        'customer_id': cid,
+        'pdf': await MultipartFile.fromFile(
+          pdf,
+          filename: 'custom itinerary.pdf',
+          contentType: MediaType('application', 'pdf'),
+        ),
+      });
       final Response<Map<String, dynamic>> res = await dio.postUri(
-          Uri.parse('snapshots'),
-          data: snapShotModel.toJson(),
+          Uri.parse('proposals'),
+          data: formData,
           options: Options(headers: authHeader));
       if (res.statusCode == 200) {
         return ApiResponse<Map<String, dynamic>>.completed(res.data);

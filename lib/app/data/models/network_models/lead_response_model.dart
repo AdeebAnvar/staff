@@ -57,6 +57,7 @@ class LeadResponseModel {
 
   static LeadResponseModel fromJson(Map<String, dynamic> json) =>
       LeadResponseModel(
+        userName: json['user_name'] == null ? '' : json['user_name'] as String,
         responseText: json['response_text'] == null
             ? ''
             : json['response_text'] as String,

@@ -13,7 +13,6 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../../core/theme/style.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/string_utils.dart';
-import '../../../data/models/local_models/custom_itinerary_model.dart';
 import '../../../data/models/network_models/activity_model.dart';
 import '../../../data/models/network_models/addons_model.dart';
 import '../../../data/models/network_models/addons_price_model.dart';
@@ -36,28 +35,37 @@ import '../../../services/dio_client.dart';
 import '../../../services/dio_download.dart';
 import '../../../widgets/custom_text_form_field.dart';
 import '../../../widgets/custom_toast.dart';
+import '../custom_booking_functions/custom_booking_functions.dart';
 import '../views/custom_booking_view.dart';
 
 class CustomBookingController extends GetxController
     with StateMixin<CustomBookingView> {
   GlobalKey<FormState> formKey = GlobalKey();
-  RxMap<int, String> countForPaxRoomError = <int, String>{}.obs;
-  RxMap<int, String> countForPaxVehicleError = <int, String>{}.obs;
+  RxMap<String, List<Map<String, String>>> roomQuantityForItinerary =
+      <String, List<Map<String, String>>>{}.obs;
+  RxMap<String, List<Map<String, String>>> roomNameForItinerary =
+      <String, List<Map<String, String>>>{}.obs;
+  RxMap<String, List<Map<String, String>>> vehicleQuantityForItinerary =
+      <String, List<Map<String, String>>>{}.obs;
+  RxMap<String, List<Map<String, String>>> vehicleNameForItinerary =
+      <String, List<Map<String, String>>>{}.obs;
+  RxMap<String, List<Map<String, String>>> activitiesQuantityForItinerary =
+      <String, List<Map<String, String>>>{}.obs;
+  RxMap<String, bool> isFetchingData = <String, bool>{}.obs;
+  RxMap<String, bool> fetchingActivities = <String, bool>{}.obs;
+  RxMap<String, bool> fetchingAddons = <String, bool>{}.obs;
   RxInt days = 0.obs;
   RxInt nights = 0.obs;
   RxInt kids = 0.obs;
   RxInt infants = 0.obs;
   RxInt adults = 0.obs;
-  RxBool tourSelecting = false.obs;
   RxBool tourSelected = false.obs;
   RxString selectedRoomCategory = RxString('');
-  RxString selectedVehicleCategory = RxString('');
-  ItineraryRooms itineraryRoomsMoDEL = ItineraryRooms();
-  ItineraryVehicles itineraryVehiclesmodel = ItineraryVehicles();
   String? tourStartingDateTime;
   String? tourEndingDateTime;
   Map<String, List<String>> activitiesForSingleDayName =
       <String, List<String>>{};
+  Map<String, List<String>> foodsForSingleDayName = <String, List<String>>{};
   Map<String, List<String>> addonsForSingleDayName = <String, List<String>>{};
   Map<String, List<String>> placesForSingleDayName = <String, List<String>>{};
   RxMap<int, String> selectedTransitDays = <int, String>{}.obs;
@@ -79,7 +87,12 @@ class CustomBookingController extends GetxController
   RxList<String> selectedVehicleTypes = <String>[].obs;
   RxMap<String, List<SingleRoomModel>> selectedRoomes =
       <String, List<SingleRoomModel>>{}.obs;
+  RxMap<String, List<FoodModel>> selectedFoods =
+      <String, List<FoodModel>>{}.obs;
   RxMap<String, List<String>> selectedVehicles = <String, List<String>>{}.obs;
+  RxMap<String, List<FoodModel>> selectedFoodsForTour =
+      <String, List<FoodModel>>{}.obs;
+  RxList<FoodModel> selectedFoodsForDays = <FoodModel>[].obs;
   RxMap<int, String> selectedRoomModel = <int, String>{}.obs;
   RxMap<int, String> selectedVehicleModel = <int, String>{}.obs;
   RxList<int> selectedRoomCategories = <int>[].obs;
@@ -113,8 +126,30 @@ class CustomBookingController extends GetxController
       <String, List<SingleVehicleModel>>{}.obs;
   RxMap<String, List<ActivityModel>> selectedActivityForaday =
       <String, List<ActivityModel>>{}.obs;
-  String? depId;
-  String? branchId;
+  RxMap<String, Map<String, dynamic>> itinerarySnapshots =
+      <String, Map<String, dynamic>>{}.obs;
+  final Map<String, String> itineraryString = <String, String>{};
+
+  RxMap<String, PlacesModel> placesForItinerary = <String, PlacesModel>{}.obs;
+  RxMap<String, List<String>> vehiclesForItinerary =
+      <String, List<String>>{}.obs;
+  RxMap<String, List<String>> vehiclestypForItinerary =
+      <String, List<String>>{}.obs;
+  RxMap<String, List<AddonsModel>> addonsForItinerary =
+      <String, List<AddonsModel>>{}.obs;
+  RxMap<String, List<ActivityModel>> activitiesForItinerary =
+      <String, List<ActivityModel>>{}.obs;
+  RxMap<String, List<String>> activitiespaxForItinerary =
+      <String, List<String>>{}.obs;
+  RxMap<String, List<String>> roomsForItinerary = <String, List<String>>{}.obs;
+  RxMap<String, List<Map<String, String>>?> foodsForItinerary =
+      <String, List<Map<String, String>>?>{}.obs;
+  RxMap<String, List<String>> roomstypesForItinerary =
+      <String, List<String>>{}.obs;
+  Rx<bool> onClickGenerateItinerary = false.obs;
+
+  List<SingleRoomModel> selectedRoomsForDropDown = <SingleRoomModel>[];
+  List<SingleVehicleModel> selectedVehicleForDropDown = <SingleVehicleModel>[];
   String? tourId;
   String placeId = '';
   final RxString notSelectedTour = RxString('');
@@ -159,50 +194,58 @@ class CustomBookingController extends GetxController
   RxBool searchingRooms = false.obs;
   RxBool searchingVehicles = false.obs;
   RxBool searchingFood = false.obs;
+  TeleCallerModel telecaCaller = TeleCallerModel();
+  Rx<bool> isCheckingPlaces = false.obs;
+
+  RxBool isProposal = true.obs;
+
+  RxMap<String, Map<num?, String>> activityAmount =
+      <String, Map<num?, String>>{}.obs;
+
+  RxBool generatingPDF = false.obs;
+  TeleCallerModel telecallerModel = TeleCallerModel();
+  final List<List<String>> result = <List<String>>[];
+  final List<ItinerarySnapshotsData> itinerarySnapshotsDataList =
+      <ItinerarySnapshotsData>[];
+  RxMap<String, PlacesModel> placesForSingleDay = <String, PlacesModel>{}.obs;
+
+  RxList<AddonPriceModel> addonPriceModel = <AddonPriceModel>[].obs;
+  Map<String, num> allPricesOfAddonVehicle = <String, num>{};
+  RxList<VehiclePriceModel> vehiclePriceModel = <VehiclePriceModel>[].obs;
+  Map<String, num> allPricesOfVehicle = <String, num>{};
+  RxList<String> roomTypes = <String>[].obs;
+  RxBool checkingRoomTypes = false.obs;
+  RxList<String> roomTypesDropDown = RxList<String>(<String>['']);
+  RxList<String> vehicleTypeDropDown = RxList<String>(<String>['']);
+  RxBool searchingRoomTypes = false.obs;
+  num price = 0.0;
+  RxInt advAmount = 2000.obs;
+  RxInt extraAdvAmount = 0.obs;
+  RxList<String> toursIds = <String>[].obs;
+  RxMap<String, Map<String, int>> roomPrice = <String, Map<String, int>>{}.obs;
+  RxMap<String, Map<String, int>> foodPrice = <String, Map<String, int>>{}.obs;
+  RxMap<String, Map<String, int>> vehiclePrice =
+      <String, Map<String, int>>{}.obs;
+
+  RxList<String> vehicleTypesDropDown = <String>[].obs;
+  Rx<bool> isCheckingVehicle = false.obs;
+  Rx<bool> isGettingRooms = false.obs;
+  RxMap<String, int> selectedRoomTypePrices = <String, int>{}.obs;
+  RxList<SingleRoomModel> selectedRoomTypeNamesToDropDown =
+      <SingleRoomModel>[].obs;
+  RxList<String> selectedRoomTypeNames = <String>[].obs;
+  Rx<bool> isGettingVehicleCategory = false.obs;
+  RxList<String> vehicleCtegoryDropDown = RxList<String>(<String>['']);
+
+  Rx<bool> isCheckingRoomCategory = false.obs;
+  RxList<String> roomCategoryDropDown = RxList<String>(<String>['']);
+
   @override
   Future<void> onInit() async {
     super.onInit();
     await loadData();
-
-    log('njnkml, $depId');
-    roomTypesDropDown.clear();
   }
 
-  String get selecteOption => selectedOption.value;
-
-  set selecteOption(String option) {
-    selectedOption.value = option;
-  }
-
-  void itemChangeOnTransitDay(int index, bool value) {
-    if (isCheckedTransitDays[index] != true) {
-      selectedTransitDays[index] = 'Day ${index + 1}';
-      isCheckedTransitDays[index] = value;
-      dayIndexes.add(index);
-    } else {
-      selectedTransitDays.remove(index);
-      dayIndexes.remove(index);
-      isCheckedTransitDays[index] = value;
-      dayIndexes.remove(index);
-    }
-    log('day ind $dayIndexes');
-    log('checked tr $isCheckedTransitDays');
-    log('selected tra $selectedTransitDays');
-  }
-
-  String depImage = '';
-  void itemChangeOnRoomType(int index, bool value) {
-    if (isCheckedRoomTypes[index] != true) {
-      selectedRoomTypes[index] = roomTypes[index];
-      isCheckedRoomTypes[index] = value;
-    } else {
-      selectedRoomTypes.remove(index.toString());
-      isCheckedRoomTypes[index] = value;
-    }
-    log(selectedRoomTypes.toString());
-  }
-
-  TeleCallerModel telecaCaller = TeleCallerModel();
   Future<void> loadData() async {
     change(null, status: RxStatus.loading());
     if (Get.arguments != null) {
@@ -210,9 +253,6 @@ class CustomBookingController extends GetxController
       customerId = Get.arguments[1] as String;
       customerName = Get.arguments[2] as String;
       tourValues.clear();
-      depId = await storage.read('depID') as String;
-      branchId = await storage.read('branchID') as String;
-      depImage = await storage.read('depImage') as String;
       telecaCaller = await storage.read('telecaller_data') as TeleCallerModel;
 
       await loadTours();
@@ -223,8 +263,8 @@ class CustomBookingController extends GetxController
 
   Future<void> loadTours() async {
     try {
-      final ApiResponse<List<TourModel>> response =
-          await ToursRepository().getAllToursInDepartment(depId.toString());
+      final ApiResponse<List<TourModel>> response = await ToursRepository()
+          .getAllToursInDepartment(telecaCaller.depId.toString());
       if (response.data != null && response.data!.isNotEmpty) {
         tours.value = response.data!;
         final Set<String> uniqueValues =
@@ -243,87 +283,41 @@ class CustomBookingController extends GetxController
         change(null, status: RxStatus.success());
       } else {
         change(null, status: RxStatus.empty());
-        // Debug statement for duplicate value
-        // tourPdfEmpty = false;
       }
     } catch (e) {
       log(e.toString());
     }
   }
 
-  Future<void> getAddons(String placeId, String index) async {
+  Future<void> getAddons(String placeId, String dayKey, int dayIndex) async {
     try {
+      fetchingAddons['Day ${dayIndex + 1}'] = true;
       final ApiResponse<List<AddonsModel>> res =
           await CustomBookingRepo().getAddons(placeId);
 
       if (res.data!.isNotEmpty) {
-        addonsModel[index] = res.data!;
+        addonsModel[dayKey] = res.data!;
         addonValues.clear();
-        log('bhjj ${res.data}');
-        // final Set<String> uniqueValues =
-        //     <String>{}; // Use a set to track unique values
-        // final List<AddonsModel> addons = addonsModel;
-
-        // for (final AddonsModel addons in addons) {
-        //   if (addons.addonName != null &&
-        //       !uniqueValues.contains(addons.addonName)) {
-        //     uniqueValues.add(addons.addonName!);
-
-        //     addonValues.add(addons.addonName!);
-        //   } else {}
-        // }
-      } else {
-        CustomToastMessage().showCustomToastMessage('No addons found');
+        fetchingAddons['Day ${dayIndex + 1}'] = false;
       }
     } catch (e) {
+      fetchingAddons['Day ${dayIndex + 1}'] = false;
+
       log('room $e');
     }
   }
 
-  RxMap<String, PlacesModel> placesForItinerary = <String, PlacesModel>{}.obs;
-  RxMap<String, List<String>> vehiclesForItinerary =
-      <String, List<String>>{}.obs;
-  RxMap<String, List<String>> vehiclestypForItinerary =
-      <String, List<String>>{}.obs;
-  RxMap<String, List<AddonsModel>> addonsForItinerary =
-      <String, List<AddonsModel>>{}.obs;
-  RxMap<String, List<ActivityModel>> activitiesForItinerary =
-      <String, List<ActivityModel>>{}.obs;
-  RxMap<String, List<String>> activitiespaxForItinerary =
-      <String, List<String>>{}.obs;
-  RxMap<String, List<String>> roomsForItinerary = <String, List<String>>{}.obs;
-  RxMap<String, List<String>> roomstypesForItinerary =
-      <String, List<String>>{}.obs;
-
-  Future<void> getActivities(String placeId, String index) async {
-    if (activityModel.containsKey(index)) {
-      activityModel[index]!.clear();
+  Future<void> getActivities(
+      String placeId, String dayKey, int dayIndex) async {
+    if (activityModel.containsKey(dayKey)) {
+      activityModel[dayKey]!.clear();
     }
     try {
       final ApiResponse<List<ActivityModel>> res =
           await CustomBookingRepo().getActivities(placeId);
 
       if (res.data!.isNotEmpty) {
-        activityModel[index] = res.data!;
-
-        log('yuyvvyyv kj$activityModel');
-        log('yuyvvyyv kje$placeId');
-        activityValues.clear();
-
-        // final Set<String> uniqueValues = <String>{};
-        // for (final String placeId in activityModel.value) {
-        //   final List<ActivityModel> activities = activityModel[placeId]!;
-
-        //   for (final ActivityModel activity in activities) {
-        //     if (activity.activityName != null &&
-        //         !uniqueValues.contains(activity.activityName)) {
-        //       uniqueValues.add(activity.activityName!);
-        //       activityValues.add(activity.activityName!);
-        //     }
-        //   }
-        // }
-      } else {
-        CustomToastMessage().showCustomToastMessage('No activities found');
+        activityModel[dayKey] = res.data!;
       }
     } catch (e) {
       log('room $e');
@@ -343,88 +337,20 @@ class CustomBookingController extends GetxController
       if (res.data!.isNotEmpty) {
         foodModel.value = res.data!;
         searchingFood.value = false;
-
-        // final Set<String> uniqueValues =
-        //     <String>{}; // Use a set to track unique values
-
-        // for (final FoodModel food in foodModel['Day ${index + 1}']!) {
-        //   if (food.foodType != null && !uniqueValues.contains(food.foodType)) {
-        //     uniqueValues.add(food.foodType!);
-        //     foodTypeValues.add(food.foodType!);
-        //   } else {}
-        // }
+        for (int i = 0; i < days.value; i++) {
+          selectedFoodsForTour['Day ${i + 1}'] = <FoodModel>[];
+        }
+        for (int i = 0; i < days.value; i++) {
+          selectedFoods['Day ${i + 1}'] = <FoodModel>[];
+        }
       } else {
         searchingFood.value = false;
-
-        // CustomToastMessage().showCustomToastMessage('No f found');
       }
     } catch (e) {
       searchingFood.value = false;
 
       log('room $e');
     }
-  }
-
-  Future<void> selectRoomContainer(int index, int id) async {
-    final bool isSelected = confirmedBoolienRoomList[index] ?? false;
-
-    if (isSelected) {
-      confirmedRooms
-          .remove(index); // Remove the room from the confirmedRooms map
-      confirmedBoolienRoomList[index] = false; // Mark as unselected
-    } else {
-      confirmedRooms[index] =
-          roomModel[index]; // Add the room to the confirmedRooms map
-      confirmedBoolienRoomList[index] = true; // Mark as selected
-    }
-    log(confirmedRooms.toString());
-    update(<int>[id, index]);
-  }
-
-  // final Tour tour = Tour(
-  //   roomBuilding: roomModel[index].roomNumber.toString(),
-  //   roomCategory: roomModel[index].roomBuilding.toString(),
-  //   roomId: roomModel[index].roomId,
-  //   roomNumber: roomModel[index].roomNumber.toString(),
-  //   roomPrice: roomModel[index].roomPrice,
-  // );
-  // await storage.write('tour', tour);
-  // room = await storage.read('tour') as Tour;
-  void selectVehicleContainer(int index, int id) {
-    final bool isSelected = confirmedBoolienVehicleList[index] ?? false;
-
-    if (isSelected) {
-      confirmedVehicles
-          .remove(index); // Remove the room from the confirmedRooms map
-      confirmedBoolienVehicleList[index] = false; // Mark as unselected
-    } else {
-      confirmedVehicles[index] =
-          vehicleModel[index]; // Add the room to the confirmedVehicles map
-      confirmedBoolienVehicleList[index] = true; // Mark as selected
-    }
-    log(confirmedVehicles.toString());
-    update(<int>[id, index]);
-  }
-
-  void onPlaceChanged(int index, String? value) {
-    update(<int>[index]);
-
-    log('Selected place for day ${index + 1}: ${value ?? ''}');
-  }
-
-  void onAddonChanged(int index, String? value) {
-    selectedAddonValues[index] = value;
-    update(<int>[index]);
-  }
-
-  void onFoodChanged(int index, String? value) {
-    selectedFoodTypeValues[index] = value;
-    update(<int>[index]);
-  }
-
-  void onActivityChanged(int index, String? value) {
-    selectedActivityValues[index] = value.toString();
-    log('Selected activity for day ${index + 1}: ${value ?? ''}');
   }
 
   String? validateSelectedTourStartingDateTime(String? value) =>
@@ -437,9 +363,6 @@ class CustomBookingController extends GetxController
           ? null
           : 'Add Tour Ending Date and Time';
 
-  String? validateTotalTourDays(String? p0) =>
-      p0!.isEmpty ? 'add total tour days' : null;
-
   String? validateDaysofTour(String? p0) =>
       p0!.isEmpty ? 'add tour days' : null;
 
@@ -451,59 +374,32 @@ class CustomBookingController extends GetxController
 
   String? validateKidsCount(String? p0) =>
       p0!.isEmpty ? 'add total kids count' : null;
+
   String? validateInfantsCount(String? p0) =>
       p0!.isEmpty ? 'add total infants count' : null;
 
-  List<SingleRoomModel> selectedRoomsForDropDown = <SingleRoomModel>[];
-  List<SingleVehicleModel> selectedVehicleForDropDown = <SingleVehicleModel>[];
-  Rx<bool> onClickGenerateItinerary = false.obs;
   Future<void> onClickCreateItinerary() async {
     onClickGenerateItinerary.value = true;
 
-    log(' k 1');
     if (formKey.currentState!.validate()) {
       if (isTransit.value) {
-        // transit tour
-        log(' k 2');
       } else {
-        // non transit tour
-        log(' k 3');
-
         if (selectedTourWithoutTransit.isNotEmpty) {
-          // final DateTime date1 =
-          //     DateTime.parse(tourStartingDateTime.toString());
-          // final DateTime date2 = DateTime.parse(tourEndingDateTime.toString());
-          // final Duration totalDaysNeeded =
-          //     date2.difference(date1) + const Duration(days: 1);
-          // final int totalDaysAdded = days.value;
-          // log('date 1 $date1');
-          // log('date 2 $date2');
-          // log('date diff  ${date2.difference(date1).inDays}');
           final DateTime date1 = DateTime.parse(
               tourStartingDateTime.toString().toDateOnly().toString());
           final DateTime date2 = DateTime.parse(
               tourEndingDateTime.toString().toDateOnly().toString());
 
-// Calculate the difference in full 24-hour days
           final Duration tdays = date2.isAfter(date1)
               ? date2.difference(date1)
               : date1.difference(date2);
           final Duration totalDaysNeeded = tdays + const Duration(days: 1);
           final int totalDaysAdded = days.value;
 
-          log('date 1 ${date1.day}');
-          log('date 2 ${date2.day}');
-          log('date diff in totalDaysAdded $totalDaysAdded');
-          log('date diff in days ${totalDaysNeeded.inDays}');
-
           if (totalDaysNeeded.inDays != totalDaysAdded) {
-            log(' k 20');
-
             CustomToastMessage().showCustomToastMessage('Dates not matched');
             onClickGenerateItinerary.value = false;
           } else {
-            log(' k 21');
-
             for (int i = 0; i < days.value; i++) {
               transitDays.add('Day ${i + 1}');
             }
@@ -516,7 +412,6 @@ class CustomBookingController extends GetxController
                 log(' k 22');
               }
             });
-
             selectedRoomModel.forEach((int key, String value) {
               final SingleRoomModel room = roomModel.firstWhere(
                   (SingleRoomModel room) => room.roomBuilding == value);
@@ -525,134 +420,28 @@ class CustomBookingController extends GetxController
                 log(' k 23');
               }
             });
+            if (nights.value == 0) {
+              CustomToastMessage().showCustomToastMessage('Add Nights');
+            } else if (roomPrice.isEmpty && roomPrice == null) {
+              CustomToastMessage()
+                  .showCustomToastMessage('Check the room details');
+            } else if (days.value == 0) {
+              CustomToastMessage().showCustomToastMessage('Add Days');
+            } else if (vehiclesForItinerary.isEmpty &&
+                vehiclesForItinerary == null) {
+              CustomToastMessage()
+                  .showCustomToastMessage('Check the vehicle details');
+            } else {
+              final String tourId = tours.value
+                  .firstWhere((TourModel element) =>
+                      element.tourName == selectedTourWithoutTransit.value)
+                  .tourId!;
+              await getPlaces(tourId);
 
-            final String tourId = tours.value
-                .firstWhere((TourModel element) =>
-                    element.tourName == selectedTourWithoutTransit.value)
-                .tourId!;
-
-            await getPlaces(tourId);
-            final List<String> roomIds = roomQTY.entries
-                .toList()
-                .map((MapEntry<String, int> e) => e.key)
-                .toList();
-            final List<int> roomQtys = roomQTY.entries
-                .toList()
-                .map((MapEntry<String, int> e) => e.value)
-                .toList();
-            final ItineraryRooms itineraryRooms = ItineraryRooms(
-              roomId: roomIds,
-              qty: roomQtys,
-            );
-            final List<String> vehIds = vehicleQTY.entries
-                .toList()
-                .map((MapEntry<String, int> e) => e.key)
-                .toList();
-            final List<int> vehiQty = vehicleQTY.entries
-                .toList()
-                .map((MapEntry<String, int> e) => e.value)
-                .toList();
-            final ItineraryVehicles itineraryVehicles = ItineraryVehicles(
-              vehicleId: vehIds,
-              qty: vehiQty,
-            );
-            itineraryRoomsMoDEL.qty = itineraryRooms.qty;
-            itineraryRoomsMoDEL.roomId = itineraryRooms.roomId;
-            itineraryVehiclesmodel.qty = itineraryVehicles.qty;
-            itineraryVehiclesmodel.vehicleId = itineraryVehicles.vehicleId;
-            firstPhaseCompleted.value = true;
-            onClickGenerateItinerary.value = false;
+              firstPhaseCompleted.value = true;
+              onClickGenerateItinerary.value = false;
+            }
           }
-          // tour not selected    \\
-          //   log(' k 4');
-
-          //   CustomToastMessage().showCustomToastMessage('No tour selected');
-          //   onClickGenerateItinerary.value = false;
-          // } else if (selectedRoomModel.isEmpty) {
-          //   // no rooms selected
-          //   isSelectedTab.value = 0;
-          //   log(' k 5');
-
-          //   CustomToastMessage().showCustomToastMessage('No room selected');
-          //   onClickGenerateItinerary.value = false;
-          // } else if (paxCountForRoom.isEmpty) {
-          //   // pax for room sn't given
-          //   log(' k 6');
-
-          //   CustomToastMessage()
-          //       .showCustomToastMessage('No pax added to any rooms');
-          //   onClickGenerateItinerary.value = false;
-          // } else {
-          //   log(' k 7');
-
-          //   int totalPax = 0;
-          //   final List<String> assignedPax = paxCountForRoom.entries
-          //       .toList()
-          //       .map((MapEntry<int, String> e) => e.value)
-          //       .toList();
-          //   for (final String str in assignedPax) {
-          //     final int? value = int.tryParse(str);
-          //     if (value != null) {
-          //       totalPax += value;
-          //       log(' k 8');
-          //     }
-          //   }
-          //   log(' k 9');
-
-          //   if (totalPax != adults.value) {
-          //     log(' k 10');
-
-          //     CustomToastMessage()
-          //         .showCustomToastMessage('check added pax in rooms');
-          //     onClickGenerateItinerary.value = false;
-          //   } else if (selectedVehicleModel.isEmpty) {
-          //     // no vehicle selected
-          //     log(' k 11');
-
-          //     isSelectedTab.value = 1;
-          //     CustomToastMessage().showCustomToastMessage('No vehicle selected');
-          //     onClickGenerateItinerary.value = false;
-          //   } else if (paxCountForVehicle.isEmpty) {
-          //     // pax for vehicle isn't given
-          //     log(' k 12');
-
-          //     CustomToastMessage()
-          //         .showCustomToastMessage('check added pax in vehicles');
-          //     onClickGenerateItinerary.value = false;
-          //   } else {
-          //     log(' k 13');
-
-          //     int totalPax = 0;
-          //     final List<String> assignedPax = paxCountForVehicle.entries
-          //         .toList()
-          //         .map((MapEntry<int, String> e) => e.value)
-          //         .toList();
-          //     for (final String str in assignedPax) {
-          //       final int? value = int.tryParse(str);
-          //       if (value != null) {
-          //         totalPax += value;
-          //         log(' k 14');
-          //       }
-          //     }
-          //     final int pax = adults.value + kids.value;
-          //     if (paxCountForVehicle.length != selectedVehicleModel.length) {
-          //       log(' k 15');
-          //       log(paxCountForVehicle.toString());
-          //       log(selectedVehicleModel.toString());
-          //     } else {
-          //       if (paxCountForRoom.length != selectedRoomModel.length) {
-          //         log(' k 16');
-          //       } else {
-          //         log(' k 17');
-
-          //         if (totalPax > pax || totalPax < pax) {
-          //           log(' k 18');
-
-          //           CustomToastMessage()
-          //               .showCustomToastMessage('check added pax in vehicle');
-          //           onClickGenerateItinerary.value = false;
-          //         } else {
-          //           log(' k 19');
         }
       }
     } else {
@@ -662,24 +451,16 @@ class CustomBookingController extends GetxController
     }
   }
 
-  Rx<bool> isCheckingPlaces = false.obs;
   Future<void> getPlaces(String tourId) async {
     isCheckingPlaces.value = true;
-    // placesModel.value.clear();
-    // placeValues.clear();
-    log(tourId);
+
     try {
       final ApiResponse<List<PlacesModel>> response =
           await CustomBookingRepo().getPlaces(tourId);
 
-      log(response.message.toString());
-
       if (response.data != null && response.data!.isNotEmpty) {
         placesModel.value = response.data!;
-        // for (int i = 0; i < response.data!.length; i++) {
-        //   isSelectedPlaces['Day ${index + 1}'] = false;
-        // }
-        // log(isSelectedPlaces.toString());
+
         placeValues.clear();
 
         final Set<String> uniqueValues =
@@ -709,9 +490,6 @@ class CustomBookingController extends GetxController
     }
   }
 
-  Rx<bool> isCheckingRoomCategory = false.obs;
-  RxList<String> roomCategoryDropDown = RxList<String>(<String>['']);
-
   Future<void> getRoomCategoriesFromApi() async {
     isCheckingRoomCategory.value = true;
     searchingRooms.value = true;
@@ -730,13 +508,16 @@ class CustomBookingController extends GetxController
         final Set<String> uniqueValues =
             <String>{}; // Use a set to track unique values
         uniqueValues.clear();
-
+        log('1');
         for (final RoomCategoryModel room in roomCategoryModel) {
           if (room.catId != null &&
               !uniqueValues.contains(room.catName.toString())) {
+            log('2');
             uniqueValues.add(room.catName.toString());
             roomCategoryDropDown.add(room.catName.toString());
+            log(roomCategoryDropDown.toString());
           } else {
+            log('3');
             // Debug statement for duplicate value
             // tourPdfEmpty = false;
             searchingRooms.value = false;
@@ -749,13 +530,11 @@ class CustomBookingController extends GetxController
         searchingRooms.value = false;
       }
     } catch (e) {
+      log(e.toString());
       isCheckingRoomCategory.value = false;
       searchingRooms.value = false;
     }
   }
-
-  Rx<bool> isGettingVehicleCategory = false.obs;
-  RxList<String> vehicleCtegoryDropDown = RxList<String>(<String>['']);
 
   Future<void> getVehicleCategoriesFromApi() async {
     isGettingVehicleCategory.value = true;
@@ -798,52 +577,20 @@ class CustomBookingController extends GetxController
     }
   }
 
-  Rx<bool> isGettingRooms = false.obs;
-  RxMap<String, int> selectedRoomTypePrices = <String, int>{}.obs;
-  RxList<SingleRoomModel> selectedRoomTypeNamesToDropDown =
-      <SingleRoomModel>[].obs;
-  RxList<String> selectedRoomTypeNames = <String>[].obs;
   Future<void> getRooms(
       List<String> roomtypes, List<String> roomCategories) async {
     isGettingRooms.value = true;
 
-    // await checkToursInTransit(roomCategories: roomCategories, roomTypes: rt);
     await checkToursNonTransit(
             roomCategories: roomCategories, roomTypes: roomtypes)
         .then((value) => isGettingRooms.value = false);
-
-    // final RoomsCheckingModel rm = RoomsCheckingModel(
-    //   tourId: tourId,
-    //   roomCategories: selectedRoomTypeValues.entries
-    //       .toList()
-    //       .map((MapEntry<int, String> e) => e.value)
-    //       .toList(),
-    //   roomTypes: selectedRoomCategoryValues.entries
-    //       .toList()
-    //       .map((MapEntry<int, String> e) => e.value)
-    //       .toList(),
-    // );
-
-    // final ApiResponse<List<SingleRoomModel>> res =
-    //     await CustomBookingRepo().checkRooms(rm);
-
-    // if (res.data!.isNotEmpty) {
-    //   roomModel.value = res.data!;
-
-    //   await checkVehicleAvailability();
-    // } else {
-    //   checkingAvailabilty.value = false;
-
-    //   CustomToastMessage().showCustomToastMessage('No rooms found');
-    // }
   }
 
-  RxList<String> vehicleTypesDropDown = <String>[].obs;
-  Rx<bool> isCheckingVehicle = false.obs;
   Future<void> checkVehicleAvailability(
       {required List<String> vehicleCatyegory}) async {
     log('Kiimii 1');
     isCheckingVehicle.value = true;
+    searchingVehicles.value = true;
     final List<String> vehicleCatyegoryIds = <String>[];
     for (final String element in vehicleCatyegory) {
       final String id = vehicleCategoryModel
@@ -871,6 +618,7 @@ class CustomBookingController extends GetxController
       log(res.message.toString());
       if (res.data != null) {
         log('Kiimii 3');
+        searchingVehicles.value = false;
 
         vehicleModel.value = res.data!;
         final List<String> allVehicleInpLace = <String>[];
@@ -897,8 +645,10 @@ class CustomBookingController extends GetxController
         log('vehicleTypesDropDown.value.toString()');
       } else {
         log('Kiimii 5');
+        searchingVehicles.value = false;
       }
     } catch (e) {
+      searchingVehicles.value = false;
       log('Kiimii 4');
 
       checkingAvailabilty.value = false;
@@ -906,47 +656,6 @@ class CustomBookingController extends GetxController
       log('veh $e');
     }
   }
-
-  Future<void> checkToursInTransit(
-      {required List<int> roomCategories,
-      required List<String> roomTypes}) async {
-    if (selectedTourWithTransit.isNotEmpty) {
-      for (final String tourCode in selectedTourWithTransit.values) {
-        try {
-          final TourModel tour = tours
-              .firstWhere((TourModel element) => element.tourName == tourCode);
-
-          final String tourId = tour.tourId!;
-          log('single not tour $tourId');
-          final RoomsCheckingModel rm = RoomsCheckingModel(
-              tourId: tourId,
-              roomCategories: roomCategories,
-              roomTypes: roomTypes);
-
-          final ApiResponse<List<SingleRoomModel>> res =
-              await CustomBookingRepo().checkRooms(rm);
-
-          if (res.data!.isNotEmpty) {
-            roomModel.value = res.data!;
-
-            // await checkVehicleAvailability();
-          } else {
-            checkingAvailabilty.value = false;
-
-            CustomToastMessage().showCustomToastMessage('No rooms found');
-          }
-          // Now you have the tourId, you can make the API call using this value
-        } catch (e) {
-          // Handle any errors if tour code doesn't match or other issues
-          log('Error fetching tourId for tourCode $tourCode: $e');
-        }
-      }
-    }
-  }
-
-  RxMap<String, Map<String, int>> roomPrice = <String, Map<String, int>>{}.obs;
-  RxMap<String, Map<String, int>> vehiclePrice =
-      <String, Map<String, int>>{}.obs;
 
   Future<void> checkToursNonTransit(
       {required List<String> roomCategories,
@@ -958,8 +667,6 @@ class CustomBookingController extends GetxController
         orElse: () =>
             TourModel(depId: ''), // Return null if no matching element is found
       );
-      // roomCategories =[A/C]
-      // roomTypes=[2 shared,4 shared
 
       final List<int> roomcatId = <int>[];
 
@@ -995,7 +702,6 @@ class CustomBookingController extends GetxController
     }
   }
 
-  RxList<String> toursIds = <String>[].obs;
   Future<void> getToursIds() async {
     if (selectedTourWithTransit.isNotEmpty) {}
     if (selectedTourWithoutTransit.isNotEmpty) {
@@ -1028,13 +734,10 @@ class CustomBookingController extends GetxController
     }
   }
 
-  var price;
-  RxInt advAmount = 2000.obs;
-  RxInt extraAdvAmount = 0.obs;
   Future<void> calculateCost({
     required BuildContext context,
   }) async {
-    log('guhj ${placesForSingleDay.length}');
+    log('guhffj ${itinerarySnapshots}');
     if (placesForSingleDay.length == days.value) {
       final List<String> vehicleNames = <String>[];
 
@@ -1052,14 +755,13 @@ class CustomBookingController extends GetxController
             .roomBuilding!;
         roomNames.add(roomName);
       }
-      final String tourId = tours
-          .firstWhere((TourModel element) =>
-              element.tourName == selectedTourWithoutTransit.value)
-          .tourId
-          .toString();
 
-      final num totalCost = calculateTotalCost(roomPrice,
-          allPricesOfAddonVehicle, allPricesOfVehicle, activityAmount.value);
+      final num totalCost = calculateTotalCost(
+          roomPrice,
+          allPricesOfAddonVehicle,
+          allPricesOfVehicle,
+          activityAmount.value,
+          foodPrice);
       log('totl $totalCost');
       price = totalCost / adults.value;
       showDialog(
@@ -1082,7 +784,7 @@ class CustomBookingController extends GetxController
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text('Package amount : $price /pax',
+                  Text('Package amount : ${price.round()} /pax',
                       style: subheading1.copyWith(fontWeight: FontWeight.bold)),
                   const Text('Advance amount :'),
                   Padding(
@@ -1116,7 +818,16 @@ class CustomBookingController extends GetxController
                         '${advAmount.value + extraAdvAmount.value} /pax',
                         style:
                             subheading1.copyWith(fontWeight: FontWeight.bold));
-                  })
+                  }),
+                  const SizedBox(height: 10),
+                  Text(
+                      'You will get 🪙 ${getPoints(price)} points /pax for this tour ',
+                      style: subheading1,
+                      textAlign: TextAlign.center),
+                  Text(
+                      '(*points only rewarded after the booking confirmation )',
+                      textAlign: TextAlign.center,
+                      style: subheading3),
                 ],
               )),
         ),
@@ -1127,21 +838,31 @@ class CustomBookingController extends GetxController
   }
 
   num calculateTotalCost(
-      Map<String, Map<String, int>> roomPrices,
-      Map<String, num> allPricesOfAddonVehicle,
-      Map<String, num> allPricesOfVehicle,
-      Map<String, Map<num?, String>> activityAmount) {
+    Map<String, Map<String, int>> roomPrices,
+    Map<String, num> allPricesOfAddonVehicle,
+    Map<String, num> allPricesOfVehicle,
+    Map<String, Map<num?, String>> activityAmount,
+    Map<String, Map<String, int>> foodPrices,
+  ) {
     num totalCost = 0;
     log('vgbhkjml,; roomPrices $roomPrices');
     log('vgbhkjml,;allPricesOfAddonVehicle $allPricesOfAddonVehicle');
     log('vgbhkjml,;allPricesOfVehicle $allPricesOfVehicle');
     log('vgbhkjml,;activityAmount $activityAmount');
+    log('vgbhkjml,;activityAmount $selectedFoodsForDays');
     // Iterate through nights and days
     for (final String night in roomPrices.keys) {
       final Map<String, int>? roomPrice = roomPrices[night];
 
       if (roomPrice != null && roomPrice.isNotEmpty) {
         totalCost += roomPrice.values.reduce((int a, int b) => a + b);
+      }
+    }
+    for (final String day in foodPrices.keys) {
+      final Map<String, int>? foodPrice = foodPrices[day];
+
+      if (foodPrice != null && foodPrice.isNotEmpty) {
+        totalCost += foodPrice.values.reduce((int a, int b) => a + b);
       }
     }
 
@@ -1168,12 +889,6 @@ class CustomBookingController extends GetxController
     return totalCost;
   }
 
-  RxList<String> roomTypes = <String>[].obs;
-  RxBool checkingRoomTypes = false.obs;
-  RxString roomTypesNotFound = RxString('');
-  RxList<String> roomTypesDropDown = RxList<String>(<String>['']);
-  RxList<String> vehicleTypeDropDown = RxList<String>(<String>['']);
-  RxBool searchingRoomTypes = false.obs;
   Future<void> getRoomTypes() async {
     checkingRoomTypes.value = true;
     searchingRoomTypes.value = true;
@@ -1231,14 +946,10 @@ class CustomBookingController extends GetxController
       checkingRoomTypes.value = false;
       searchingRoomTypes.value = false;
 
-      roomTypesNotFound.value = 'Room Types Not Found';
-
       log(e.toString());
     }
   }
 
-  RxList<VehiclePriceModel> vehiclePriceModel = <VehiclePriceModel>[].obs;
-  Map<String, num> allPricesOfVehicle = <String, num>{};
   Future<void> getVehiclePricesinPlaces(String placeId,
       List<String> vehicleNames, List<int> vehicleQty, int dayIndex) async {
     try {
@@ -1278,11 +989,6 @@ class CustomBookingController extends GetxController
     }
   }
 
-  RxMap<String, Map<num?, String>> activityAmount =
-      <String, Map<num?, String>>{}.obs;
-
-  RxList<AddonPriceModel> addonPriceModel = <AddonPriceModel>[].obs;
-  Map<String, num> allPricesOfAddonVehicle = <String, num>{};
   Future<void> getVehiclePricesinAddons(List<String> addonIds,
       List<String> vehicleNames, List<int> vehicleQty, int dayIndex) async {
     try {
@@ -1321,13 +1027,111 @@ class CustomBookingController extends GetxController
     }
   }
 
-  void createItineraryPDF() {
-    showPreferenceAskingDialogue();
+  void createItineraryPDF(CustomBookingController controller) {
+    final Map<String, String> vehiclesOnDay = <String, String>{};
+    vehicleNameForItinerary
+        .forEach((String key, List<Map<String, String>> value) {
+      final List<String> descriptions = <String>[];
+      for (int i = 0; i < value.length; i++) {
+        final String name = value[i]['vehicle_name']!;
+        final String quantity = vehicleQuantityForItinerary[key]![i]['qty']!;
+        descriptions.add('$quantity $name');
+      }
+      final String journeyDescription =
+          "For today's journey ${descriptions.join(' and ')} is arranged for ${adults.value} pax";
+      vehiclesOnDay[key] = journeyDescription;
+    });
+    //////
+    final Map<String, String?> roomsOnDay = <String, String?>{};
+    roomNameForItinerary.forEach((String key, List<Map<String, String>> value) {
+      final List<String> descriptions = <String>[];
+      for (int i = 0; i < value.length; i++) {
+        final String name = value[i]['room_name']!;
+        final String quantity = roomQuantityForItinerary[key]![i]['qty']!;
+        descriptions.add('$quantity $name');
+      }
+      final String journeyDescription =
+          "AfterWards you will accomadate on ${descriptions.join(' and ')} for ${adults.value + kids.value} pax";
+      roomsOnDay[key] = journeyDescription;
+    });
+    log(roomsOnDay.toString());
+    /////
+    final Map<String, String> breakFastString = <String, String>{};
+    for (int i = 0; i < days.value; i++) {
+      breakFastString['Day ${i + 1}'] = '';
+    }
+    for (int j = 0; j < days.value; j++) {
+      if (foodsForItinerary['Day ${j + 1}'] != null) {
+        for (final Map<String, String> item
+            in foodsForItinerary['Day ${j + 1}']!) {
+          item.containsKey('Break fast')
+              ? breakFastString['Day ${j + 1}'] = item['Break fast']!
+              : breakFastString['Day ${j + 1}'] = '';
+        }
+      } else {
+        breakFastString['Day ${j + 1}'] = '';
+      }
+    }
+    final Map<String, String> lunchString = <String, String>{};
+    for (int i = 0; i < days.value; i++) {
+      lunchString['Day ${i + 1}'] = '';
+    }
+    for (int j = 0; j < days.value; j++) {
+      if (foodsForItinerary['Day ${j + 1}'] != null) {
+        for (final Map<String, String> item
+            in foodsForItinerary['Day ${j + 1}']!) {
+          item.containsKey('Lunch')
+              ? lunchString['Day ${j + 1}'] = item['Lunch']!
+              : lunchString['Day ${j + 1}'] = '';
+        }
+      } else {
+        lunchString['Day ${j + 1}'] = '';
+      }
+    }
+    final Map<String, String> dinnerString = <String, String>{};
+    for (int i = 0; i < days.value; i++) {
+      dinnerString['Day ${i + 1}'] = '';
+    }
+    for (int j = 0; j < days.value; j++) {
+      if (foodsForItinerary['Day ${j + 1}'] != null) {
+        for (final Map<String, String> item
+            in foodsForItinerary['Day ${j + 1}']!) {
+          item.containsKey('Dinner')
+              ? dinnerString['Day ${j + 1}'] = item['Dinner']!
+              : dinnerString['Day ${j + 1}'] = '';
+        }
+      } else {
+        dinnerString['Day ${j + 1}'] = '';
+      }
+    }
+
+    String roomString = '';
+    for (int i = 0; i < days.value; i++) {
+      if (roomsOnDay['Night ${i + 1}'] == null) {
+        roomString = '';
+      } else {
+        roomString = roomsOnDay['Night ${i + 1}']!;
+      }
+      itineraryString['Day ${i + 1}'] =
+          placesForItinerary['Day ${i + 1}']!.placeDes! +
+              vehiclesOnDay['Day ${i + 1}']! +
+              breakFastString['Day ${i + 1}']! +
+              addonsForItinerary['Day ${i + 1}']!
+                  .map((AddonsModel e) => e.addonDes)
+                  .join(' ') +
+              lunchString['Day ${i + 1}']! +
+              activitiesForItinerary['Day ${i + 1}']!
+                  .map((ActivityModel e) => e.activityDes)
+                  .join(' ') +
+              roomString +
+              dinnerString['Day ${i + 1}']!;
+    }
+    log(itinerarySnapshots.toString());
+
+    showPreferenceAskingDialogue(controller);
   }
 
-  RxBool isProposal = true.obs;
-
-  void showPreferenceAskingDialogue() {
+  void showPreferenceAskingDialogue(CustomBookingController controller) {
     Get.dialog(
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 30.0),
@@ -1359,7 +1163,7 @@ class CustomBookingController extends GetxController
                     TextButton(
                       onPressed: () {
                         isProposal.value = true;
-                        createItinerary();
+                        createItinerary(controller);
                         Get.back();
                       },
                       style: TextButton.styleFrom(
@@ -1383,7 +1187,7 @@ class CustomBookingController extends GetxController
                           backgroundColor: englishViolet),
                       onPressed: () async {
                         isProposal.value = false;
-                        createItinerary();
+                        createItinerary(controller);
                         Get.back();
                       },
                       child: const Text('Confirm Itinerary'),
@@ -1398,72 +1202,53 @@ class CustomBookingController extends GetxController
     );
   }
 
-  RxBool generatingPDF = false.obs;
-  TeleCallerModel telecallerModel = TeleCallerModel();
-
-  Future<void> createItinerary() async {
+  Future<void> createItinerary(CustomBookingController controller) async {
     generatingPDF.value = true;
+
     try {
-      // final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
+      final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
 
-      // await downloadImage(depImage)
-      //     .then((String? value) => createPdf(pdf, value.toString()));
+      await downloadImage(telecaCaller.depImage.toString()).then(
+          (String? value) => createPdf(pdf, value.toString(), controller));
+      final Directory appDocDir = await getApplicationDocumentsDirectory();
+      final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
+      final File pdfFile = File(pdfPath);
 
-      // final Directory appDocDir = await getApplicationDocumentsDirectory();
-      // final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
-      // final File pdfFile = File(pdfPath);
-
-      // await pdfFile.writeAsBytes(await pdf.save()).then(
-      //       (File value) =>
-      //           Get.toNamed(Routes.NO_INTERNET, arguments: <String>[pdfPath]),
-      //     );
-      // generatingPDF.value = false;
-      // final List<Map<String, List<String>>?> inputMaps =
-      //     <Map<String, List<String>>?>[
-      //   placesForSingleDayName,
-      //   addonsForSingleDayName,
-      //   activitiesForSingleDayName,
-      // ];
+      await pdfFile.writeAsBytes(await pdf.save()).then(
+            (File value) => Get.toNamed(Routes.PDF,
+                arguments: <String>[pdfPath, customerId.toString()]),
+          );
+      generatingPDF.value = false;
+      final List<Map<String, List<String>>?> inputMaps =
+          <Map<String, List<String>>?>[
+        placesForSingleDayName,
+        addonsForSingleDayName,
+        activitiesForSingleDayName,
+      ];
 
       final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;
       await postSnapshots();
       if (isProposal.value != true) {
-        // final List<List<String>> resultList = combineMaps(inputMaps);
+        final List<List<String>> resultList = combineMaps(inputMaps);
         final String id = tours
             .firstWhere((TourModel element) =>
                 element.tourName == selectedTourWithoutTransit.value)
             .tourId
             .toString();
-        //*********************************** */
-        //list of tour ids
-        // strt date
-        // end date
-        // day
-        // night
-        // adult
-        // customer id
-        // kid
-        // infant
-        // list of data
-        // place id
-        // addon id list
-        // activity id list
-        // vehicle id list
-        // room id list
-        //*********************************** */
-        // CustomBookingRepo().customBooking(
-        //   customerId: customerId.toString(),
-        //   amountPayable: price.toString(),
-        //   advPayment: '${advAmount.value + extraAdvAmount.value}',
-        //   tasks: resultList,
-        //   bookables: bookables,
-        //   tourId: id,
-        //   tourStartingDate: tourStartingDateTime.toString(),
-        //   tourEndingDate: tourEndingDateTime.toString(),
-        //   depID: depId.toString(),
-        //   branchId: branchId.toString(),
-        //   filePath: pdfPath,
-        // );
+
+        CustomBookingRepo().customBooking(
+          customerId: customerId.toString(),
+          amountPayable: price.toString(),
+          advPayment: '${advAmount.value + extraAdvAmount.value}',
+          tasks: resultList,
+          bookables: bookables,
+          tourId: id,
+          tourStartingDate: tourStartingDateTime.toString(),
+          tourEndingDate: tourEndingDateTime.toString(),
+          depID: telecaCaller.depId.toString(),
+          branchId: telecaCaller.branchId.toString(),
+          filePath: pdfPath,
+        );
       }
     } catch (e) {
       generatingPDF.value = false;
@@ -1473,8 +1258,6 @@ class CustomBookingController extends GetxController
   }
 
   List<List<String>> combineMaps(List<Map<String, List<String>>?> maps) {
-    final List<List<String>> result = <List<String>>[];
-
     // Iterate over each map in the list
     for (final Map<String, List<String>>? inputMap in maps) {
       if (inputMap != null) {
@@ -1496,482 +1279,30 @@ class CustomBookingController extends GetxController
     return result;
   }
 
-  RxMap<String, PlacesModel> placesForSingleDay = <String, PlacesModel>{}.obs;
-
-  void createPdf(pw.Document pdf, String imageUrl) {
-    final pw.MemoryImage image =
-        pw.MemoryImage(File(imageUrl).readAsBytesSync());
-
-    return pdf.addPage(
-      pw.MultiPage(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        header: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              pw.Container(
-                width: 100,
-                height: 80,
-                child: pw.Image(
-                  height: 40,
-                  image,
-                  fit: pw.BoxFit.cover,
-                ),
-              ),
-              pw.Divider(thickness: 2, color: PdfColors.grey),
-              pw.SizedBox(height: 15)
-            ],
-          );
-        },
-        margin: const pw.EdgeInsets.symmetric(vertical: 30, horizontal: 25),
-        pageFormat: PdfPageFormat.a3,
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        build: (pw.Context context) {
-          return <pw.Widget>[
-            pw.Wrap(
-              children: <pw.Widget>[
-                pw.Header(
-                  decoration: pw.BoxDecoration(
-                      border: pw.Border.all(color: PdfColors.white)),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.center,
-                    children: <pw.Widget>[
-                      pw.Column(children: <pw.Widget>[
-                        pw.Text(
-                          selectedTourWithoutTransit.value,
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 25,
-                          ),
-                        ),
-                        pw.Text(
-                          '$days D | $nights N',
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                        ),
-                      ]),
-                    ],
-                  ),
-                ),
-                if (isProposal.value != true)
-                  pw.Header(
-                      decoration: pw.BoxDecoration(
-                          border: pw.Border.all(color: PdfColors.white)),
-                      child: pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.center,
-                          children: <pw.Widget>[
-                            pw.Text('CONFIRM ITINERARY',
-                                style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    fontSize: 18))
-                          ])),
-                if (isProposal.value)
-                  pw.Paragraph(
-                    text:
-                        '*Note : This is just a referral itinerary Upon confirmation, please get in touch with our executive and ask for your itinerary confirmation. The itinerary here is not valid for your tour.',
-                    style: pw.TextStyle(
-                        color: PdfColors.red900,
-                        fontSize: 15,
-                        fontWeight: pw.FontWeight.bold),
-                  ),
-                if (isProposal.value)
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.center,
-                    children: <pw.Widget>[
-                      pw.Paragraph(
-                        text: '''
-*Note : This itinerary is only valid upto 5 days from ${DateTime.now().toDatewithMonthFormat()}''',
-                        style: pw.TextStyle(
-                            color: PdfColors.red900,
-                            fontSize: 15,
-                            fontWeight: pw.FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                pw.ListView.builder(
-                  itemCount: days.value,
-                  itemBuilder: (pw.Context context, int dayIndex) {
-                    final PlacesModel place =
-                        placesForItinerary['Day ${dayIndex + 1}']
-                            as PlacesModel;
-                    return pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: <pw.Widget>[
-                        pw.Header(
-                          textStyle: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                          child: pw.Text(
-                            'Day ${dayIndex + 1}',
-                            style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold, fontSize: 20),
-                          ),
-                        ),
-
-                        pw.Paragraph(
-                          text: place.placeDes ?? '',
-                          style: const pw.TextStyle(fontSize: 14),
-                        ),
-                        // if (data.foodForSingleDay?['Day ${dayIndex + 1}']?.any(
-                        //         (FoodModel food) =>
-                        //             food.foodType == 'Break fast') ==
-                        //     true)
-                        //   pw.ListView.builder(
-                        //       itemBuilder: (pw.Context context, int foodIndex) {
-                        //         return pw.Row(children: <pw.Widget>[
-                        //           pw.Paragraph(
-                        //               text:
-                        //                   'We will arrange you the ${data.foodForSingleDay?['Day ${dayIndex + 1}']?[foodIndex].foodType ?? ''} ${data.foodForSingleDay?['Day ${dayIndex + 1}']?[foodIndex].foodName ?? ''} on there . ')
-                        //         ]);
-                        //       },
-                        //       itemCount: data
-                        //               .foodForSingleDay?['Day ${dayIndex + 1}']
-                        //               ?.length ??
-                        //           0),
-                        // pw.SizedBox(height: 10),
-                        pw.Paragraph(
-                            text:
-                                '${placesForItinerary['Day ${dayIndex + 1}']}'),
-                        if (vehiclesForItinerary['Day ${dayIndex + 1}'] !=
-                                null &&
-                            vehiclesForItinerary['Day ${dayIndex + 1}']!
-                                    .isNotEmpty !=
-                                false)
-                          pw.Paragraph(
-                            text:
-                                '${vehiclesForItinerary['Day ${dayIndex + 1}']?.join(' and ')} will provide for the today journey',
-                            style: const pw.TextStyle(fontSize: 14),
-                          ),
-
-                        // pw.SizedBox(height: 10),
-                        pw.ListView.builder(
-                            itemBuilder: (pw.Context context, int addonIndex) {
-                              return pw.Paragraph(
-                                text: addonsForItinerary['Day ${dayIndex + 1}']
-                                            ?[addonIndex]
-                                        .addonDes ??
-                                    '',
-                                style: const pw.TextStyle(fontSize: 14),
-                              );
-                            },
-                            itemCount: addonsForItinerary['Day ${dayIndex + 1}']
-                                    ?.length ??
-                                0),
-                        // pw.SizedBox(height: 10),
-                        pw.ListView.builder(
-                            itemBuilder:
-                                (pw.Context context, int activityIndex) {
-                              return pw.Paragraph(
-                                text: activitiesForItinerary[
-                                                'Day ${dayIndex + 1}']
-                                            ?[activityIndex]
-                                        .activityDes ??
-                                    '',
-                                style: const pw.TextStyle(fontSize: 14),
-                              );
-                            },
-                            itemCount:
-                                activitiesForItinerary['Day ${dayIndex + 1}']
-                                        ?.length ??
-                                    0),
-                        // pw.SizedBox(height: 10),
-                        if (roomsForItinerary['Night ${dayIndex + 1}'] !=
-                                null &&
-                            roomsForItinerary['Night ${dayIndex + 1}']!
-                                    .isNotEmpty !=
-                                false)
-                          pw.ListView.builder(
-                              itemBuilder: (pw.Context context, int roomIndex) {
-                                return pw.Paragraph(
-                                  text:
-                                      'After the day ends we provide you  ${roomsForItinerary['Night ${dayIndex + 1}']?.join(' and ')} to stay the in the night ',
-                                  style: const pw.TextStyle(fontSize: 14),
-                                );
-                              },
-                              itemCount: 1),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-            pw.NewPage(),
-            pw.Paragraph(
-                text: 'HDFC BANK',
-                style:
-                    pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
-            pw.Paragraph(text: 'Account Holder : TRIPPENS'),
-            pw.Paragraph(text: 'Account Number : 50200065078880'),
-            pw.Paragraph(text: 'IFSC           : HDFC0000057'),
-            pw.Paragraph(text: 'Branch         : TRICHUR - PALACE ROAD'),
-            pw.SizedBox(height: 13),
-            pw.Paragraph(
-                text: 'PAYMENT POLICY - ',
-                style:
-                    pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
-            pw.Paragraph(
-                text:
-                    '> A minimum payment is required for booking a tour - Non refundable'),
-            pw.Paragraph(
-              text: '(The minimum payment will vary depending on the tour)',
-              style: const pw.TextStyle(color: PdfColors.red900),
-            ),
-            pw.Paragraph(
-              text:
-                  '> 21-35 Days before date of departure : 50% of Cost \n 20 Days before date of departure : 100% of Total cost',
-            ),
-            pw.SizedBox(height: 13),
-            pw.Paragraph(
-                text: 'CANCELLATION AND REFUND POLICY  - ',
-                style:
-                    pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
-            pw.Paragraph(
-              text: '''
-> 60 Days & Prior to Arrival POLICY - 25% of the Tour/Service Cost.
-> 59 Days to 30 Days Prior To Arrival - 50% of the Tour/Service Cost.
-> 29 Days to 15 Days Prior To Arrival - 75% of the Tour/Service Cost.
-> 14 Days and less Prior To Arrival - No refund
-> Transportation and accommodation are as per itinerary only, if you have to change any of the
-same we will not be responsible for any kind of refund.
-> There will be no refund for add-ons.
-''',
-            ),
-            if (isProposal.value != true)
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: <pw.Widget>[
-                  pw.Column(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
-                      children: <pw.Widget>[
-                        pw.Text('Customer name : $customerName',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Customer Id : $customerId'),
-                        pw.Text(
-                            'Tour date : ${tourStartingDateTime.toString().parseFrom24Hours().toDatewithMonthFormat()}',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Adult (above 5 years):$adults ',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        if (kids != null)
-                          pw.Text('kids :$kids ',
-                              style: pw.TextStyle(
-                                  decorationThickness: 20,
-                                  fontWeight: pw.FontWeight.bold)),
-                        if (infants != null && infants != 0)
-                          pw.Text('kids :$infants ',
-                              style: pw.TextStyle(
-                                  decorationThickness: 20,
-                                  fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Executive name : ${telecaCaller.userName}',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Package Rate : $price /pax',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontSize: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text(
-                            'Advance amount : ${advAmount.value + extraAdvAmount.value} /pax',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontSize: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                      ])
-                ],
-              ),
-            pw.SizedBox(height: 20),
-            pw.NewPage(),
-            pw.Paragraph(
-                text: 'TERMS AND CONDITIONS',
-                style:
-                    pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 22)),
-            pw.Paragraph(
-              text: '''
-1. if you're not able to reach out the destination on time. That is not our responsibility
-2. Hotel Check in time - 11.30 a.m. & checkout - 10.00 am.
-3. The booking stands liable to be cancelled if 100% payment is not received less than 20 days before
-date of departure. If the trip is cancel due to this reason advance will not be refundable. If you are
-not pay the amount that in mentioned in payment policy then tour will be cancel.
-4. There is no refund option in case you cancel the tour yourself.
-5. All activities which are not mentioned in the above itinerary such as visiting additional spots or
-involving in paid activities, If arranging separate cab etc. is not included in this.
-6. In case of using additional transport will be chargeable.
-7. All transport on the tour will be grouped together. Anyone who deviates from it will be excluded
-from this package.
-8. The company has the right for expelling persons who disagree with passengers or misrepresent
-the company during the trip.
-9. The company does not allow passengers to give tips to the driver for going additional spots.
-10. In case of cancellation due to any reason such as Covid, strike, problems on the part of railways,
-malfunctions, natural calamities etc., package amount will not be refunded.
-11. The Company will not be liable for any confirmation of train tickets, flight tickets, other
-transportation or any other related items not included in the package.
-12. In Case Of Events And Circumstances Beyond Our Control, We Reserve The Right To Change All
-Or Parts Of The Contents Of The Itinerary For Safety And Well Being Of Our Esteemed Passengers.
-13. Bathroom Facility | Indian or European
-14. In season rooms will not be the same as per itinerary but category will be the same (Budget
-economy).
-15. Charge will be the same from the age of 5 years.
-16. We are not providing tourist guide, if you are taking their service in your own cost we will not be
-responsible for the same.
-17. You Should reach to departing place on time, also you should keep the time management or you
-will not be able to cover all the place.
-18. If the climate condition affect the sightseeing & activities that mentioned in itinerary, then we
-won't provide you the additional spots apart from the itinerary.
-19. Transportation timing 8 am to 6 pm, if use vehicle after that then cost will be extra
-20. Will visit places as per itinerary only, if you visit other than this then cost will be extra
-21. If any customers misbehave with our staffs improperly then we will cancel his tour immediately
-and after that he can't continue with this tour.
-22. If the trip is not fully booked or cancelled due to any special circumstances, we will postpone the
-trip to another day. Otherwise, if the journey is to be done on the pre-arranged day, the customers
-will have to bear the extra money themselves.
-23. If you have any problems with the tour, please notify us as soon as possible so that we can
-resolve the problem. If you raise the issue after the tour, we will not be able to help you.
-24.Our company does not provide specific seats on the Volvo bus, if you need a seat particularly,
-please let the executive know during the confirmation of your reservation.(requires additional
-payment).
-''',
-            )
-          ];
-        },
-        footer: (pw.Context context) {
-          log('nm,.${context.pagesCount}');
-          final String text =
-              'Page ${context.pageNumber} of ${context.pagesCount} ';
-          return pw.Container(
-            // margin: const pw.EdgeInsets.only(top: 1 * PdfPageFormat.cm),
-            alignment: pw.Alignment.centerRight,
-            decoration:
-                const pw.BoxDecoration(border: pw.Border(top: pw.BorderSide())),
-            child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: <pw.Widget>[
-                pw.Paragraph(
-                    margin: const pw.EdgeInsets.all(10),
-                    text: '''
-A TOWER COMPLEX, KALVARY, JUNCTION, POOTHOLE ROAD,\nTHRISSUR, KERALA 680004 | 04872383104 | 0487238410''',
-                    style: pw.TextStyle(fontNormal: pw.Font.courier())),
-                pw.Text(text, style: const pw.TextStyle(color: PdfColors.grey)),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Future<void> postSnapshots() async {
     final String tourid = tours
         .firstWhere((TourModel element) =>
             element.tourName == selectedTourWithoutTransit.value)
         .tourId
         .toString();
-    final List<String> addonIds = <String>[];
-    for (int i = 0; i < addonsForSingleDayName.length; i++) {
-      if (addonsForSingleDayName['Day ${i + 1}'] != null &&
-          addonsForSingleDayName['Day ${i + 1}']!.isNotEmpty) {
-        // [Shalimar Garden , Nishanth]
-        final List<String>? addData = addonsForSingleDayName['Day ${i + 1}'];
-        for (final String data in addData!) {
-          // Shalimar Garden
-          final String? addonId = addonsModel['Day ${i + 1}']!
-              .firstWhere(
-                (AddonsModel element) => element.addonName == data,
-                orElse: () => AddonsModel(),
-              )
-              .addonId;
-          ////
-          addonIds.add(addonId!);
-        }
-      }
-    }
-    log(addonIds.toString());
-    log('placesForSingleDayName : $placesForSingleDayName');
-    log('addonsForSingleDayName : $addonsForSingleDayName');
-    log('activitiesForSingleDayName : $activitiesForSingleDayName');
-    // final ItinerarySnapshotsData data = ItinerarySnapshotsData(
-    //   activity: activityIds,
-    //   addons: addonIds,
-    //   room: roomIds,
-    //   placeId: placeId,
-    //   vehicle: vehicleIds,
-    // );
-    final List<ItinerarySnapshotsData> itinerarySnapshotsDataList =
-        <ItinerarySnapshotsData>[];
-    final SnapShotModel snapShotModel = SnapShotModel(
-      adult: adults.value,
-      data: itinerarySnapshotsDataList,
-      day: days.value,
-      endDate: tourEndingDateTime,
-      startDate: tourStartingDateTime,
-      infant: infants.value,
-      kid: kids.value,
-      night: nights.value,
-      tourId: <String>[tourid],
-      customerId: int.parse(customerId.toString()),
-    );
-    // CustomBookingRepo().postSnapshots(snapShotModel);
+    final List<String> tourIds = <String>[];
+    tourIds.add(tourid);
+    CustomBookingRepo().postSnapshots(
+        adult: adults.value.toString(),
+        cid: customerId.toString(),
+        data: itinerarySnapshots.values.toList(),
+        day: days.value.toString(),
+        infant: infants.value.toString(),
+        kid: kids.value.toString(),
+        night: nights.value.toString(),
+        tourEndingDate: tourEndingDateTime.toString(),
+        tourStartingDate: tourStartingDateTime.toString(),
+        tourIds: tourIds);
+  }
+
+  num getPoints(num price) {
+    final num amount = price * 0.03;
+    final num points = amount / 20;
+    return points.round();
   }
 }
-
-final List<String> roomTypes = <String>[
-  '2 Shared',
-  '3 Shared',
-  '4 Shared',
-];
-
-/*
-{
-    "tour_id": [2,3],
-    "start_date": "2023-05-01",
-    "end_date": "2023-07-04",
-    "day": 4,
-    "night": 3,
-    "adult": 5,
-    "customer_id": 10024,
-    "kid": 9,
-    "infant": 2,
-    "data": [
-        {
-            "place_id": 1,
-            "addons": [2,3],
-            "activity": [4,5],
-            "vehicle": [3,4],
-            "room": [2,3],
-            "food": [2,3]
-        },
-        {
-            "place_id": 1,
-            "addons": [2,3],
-            "activity": [4,5],
-            "vehicle": [3,4],
-            "room": [2,3],
-            "food": [2,3]
-        },
-        {
-            "place_id": 1,
-            "addons": [2,3],
-            "activity": [4,5],
-            "vehicle": [3,4],
-            "room": [2,3],
-            "food": [2,3]
-        },
-        {
-            "place_id": 1,
-            "addons": [2,3],
-            "activity": [4,5],
-            "vehicle": [3,4],
-            "room": [2,3],
-            "food": [2,3]
-        }
-    ]
-}
-*/

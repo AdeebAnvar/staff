@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../data/models/network_models/field_staff_model.dart';
 import '../../../data/models/network_models/field_staff_single_booking_model.dart';
 import '../../../data/repository/network_repo/fieldstaff_booking_repo.dart';
 import '../../../routes/app_pages.dart';
@@ -15,7 +16,7 @@ class SingleBookingDetailsController extends GetxController
     with StateMixin<SingleBookingDetailsView> {
   RxList<FieldStaffSingleBookingModel> fieldStaffSingleBookingModel =
       <FieldStaffSingleBookingModel>[].obs;
-  String? bookingId;
+  FieldStaffBookingModel? fieldStaffBookingModel;
   @override
   void onInit() {
     super.onInit();
@@ -24,10 +25,11 @@ class SingleBookingDetailsController extends GetxController
 
   Future<void> loadData() async {
     change(null, status: RxStatus.loading());
-    if (Get.arguments != null) {
-      bookingId = Get.arguments as String;
+    if (Get.arguments[0] != null) {
+      fieldStaffBookingModel = Get.arguments[0] as FieldStaffBookingModel;
+      log(Get.arguments[0].toString());
       fieldStaffSingleBookingModel.value =
-          await getFieldStaffBookings(bookingId);
+          await getFieldStaffBookings(fieldStaffBookingModel?.bookingId);
       change(null, status: RxStatus.success());
     } else {
       change(null, status: RxStatus.empty());

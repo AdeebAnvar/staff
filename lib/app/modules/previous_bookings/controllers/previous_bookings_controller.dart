@@ -7,6 +7,7 @@ import '../../../data/models/network_models/custom_snapshot_model.dart';
 import '../../../data/models/network_models/tours_model.dart';
 import '../../../data/repository/network_repo/custombookingrepo.dart';
 import '../../../data/repository/network_repo/tours_repository.dart';
+import '../../../routes/app_pages.dart';
 import '../../../services/dio_client.dart';
 import '../views/previous_bookings_view.dart';
 
@@ -88,4 +89,7 @@ class PreviousBookingsController extends GetxController
       log(e.toString());
     }
   }
+
+  void onTapSingleSnapshot(String? shotId) =>
+      Get.toNamed(Routes.SINGLE_SNAPSHOT, arguments: shotId);
 }

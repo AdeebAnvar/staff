@@ -57,7 +57,7 @@ class CustomDatePickerField extends StatelessWidget {
               // use24HourFormat: false,
               locale: const Locale('en', 'US'),
               calendarTitle: '',
-              dateMask: isTime ? 'd MMM yy HH:mm aa' : 'd MMM yy',
+              dateMask: isTime ? 'd MMM yy hh:mm a' : 'd MMM yy',
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(7),
                 label: Text(
