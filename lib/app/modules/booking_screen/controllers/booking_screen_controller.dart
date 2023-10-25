@@ -29,7 +29,6 @@ class BookingScreenController extends GetxController
   String? fixedItyinerary;
   String? nameOFItinerary;
   RxList<String> downloadedPDFs = <String>[].obs;
-  String? phone;
   @override
   void onInit() {
     super.onInit();
@@ -49,7 +48,7 @@ class BookingScreenController extends GetxController
   Future<void> onClickFixedItinerary() async {
     isloading.value = true;
     log('message');
-    Get.toNamed(Routes.FIXED_ITINERARIES, arguments: <dynamic>[depID, phone]);
+    Get.toNamed(Routes.FIXED_ITINERARIES, arguments: <dynamic>[depID, leadId]);
     // if (selectedTourCode.value != null &&
     //     selectedTourCode.value != '' &&
     //     selectedTourCode.value.isNotEmpty) {
@@ -86,8 +85,7 @@ class BookingScreenController extends GetxController
     if (Get.arguments != null) {
       leadName = Get.arguments[0] as String;
       leadId = Get.arguments[1] as String;
-      phone = Get.arguments[2] as String;
-      log('vuhuyu $phone');
+
       await loadLeadData(leadId.toString());
       depID = await storage.read('depID') as String;
       // await loadTour();

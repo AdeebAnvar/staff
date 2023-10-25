@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../core/theme/style.dart';
@@ -19,13 +16,13 @@ class BookingScreenView extends GetView<BookingScreenController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        actions: <Widget>[
-          IconButton.filledTonal(
-              onPressed: () => controller.onClickPreviousResponses(),
-              icon: const Icon(Icons.history_sharp)),
-          const SizedBox(height: 10, width: 10),
-        ],
-      ),
+          // actions: <Widget>[
+          //   IconButton.filledTonal(
+          //       onPressed: () => controller.onClickPreviousResponses(),
+          //       icon: const Icon(Icons.history_sharp)),
+          //   const SizedBox(height: 10, width: 10),
+          // ],
+          ),
       body: controller.obx(
         onLoading: const CustomLoadingScreen(),
         (BookingScreenView? state) => RefreshIndicator(

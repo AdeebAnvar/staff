@@ -82,7 +82,6 @@ class SingleLeadController extends GetxController
     Get.toNamed(Routes.BOOKING_SCREEN, arguments: <dynamic>[
       leads[0].customerName,
       leads[0].customerId,
-      leads[0].customerPhone
     ]);
   }
 
@@ -269,7 +268,7 @@ class SingleLeadController extends GetxController
     } catch (e) {
       isloading.value = false;
 
-      log('iubugbuigb ${e.toString()}');
+      log('iubugbuigb $e');
     }
   }
 
@@ -288,7 +287,7 @@ class SingleLeadController extends GetxController
         change(null, status: RxStatus.empty());
       }
     } catch (e) {
-      log('khuiuh8uiu ${e.toString()}');
+      log('khuiuh8uiu $e');
     }
   }
 
@@ -329,7 +328,7 @@ class SingleLeadController extends GetxController
         change(null, status: RxStatus.empty());
       }
     } catch (e) {
-      log('rfruiooik ${e.toString()}');
+      log('rfruiooik $e');
       change(null, status: RxStatus.empty());
     }
   }
@@ -346,7 +345,7 @@ class SingleLeadController extends GetxController
         log('message');
       }
     } catch (e) {
-      log('weyijkcaa ${e.toString()}');
+      log('weyijkcaa $e');
     }
   }
 
@@ -489,10 +488,10 @@ class SingleLeadController extends GetxController
                 buildItem('Source', leads[0].customerSource),
                 Obx(() {
                   return CustomDropDownButton(
-                    dropdownValues: const <String>['Standard', 'Premium'],
+                    dropdownValues: const <String>['standard', 'premium'],
                     value: selectedCategory.value != null &&
                             selectedCategory.value.isNotEmpty
-                        ? selectedCategory.value
+                        ? selectedCategory.value.toLowerCase()
                         : null,
                     onChanged: (String? p0) {
                       selectedCategory.value = p0.toString();
@@ -601,7 +600,7 @@ class SingleLeadController extends GetxController
         }
       });
     } catch (e) {
-      log('wdiomciok ${e.toString()}');
+      log('wdiomciok $e');
     }
   }
 }

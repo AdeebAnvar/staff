@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../widgets/create_itinerary_section.dart';
 import '../../../widgets/custom_appbar.dart';
-import '../../../widgets/custombooking_first_phase.dart';
 import '../controllers/custom_itinerary_controller.dart';
 
 class CustomItineraryView extends StatelessWidget {
@@ -26,20 +24,7 @@ class CustomItineraryView extends StatelessWidget {
             ),
             child: Form(
               key: controller.formKey,
-              child: Column(
-                children: <Widget>[
-                  // Obx(
-                  //   () => controller.firstPhaseCompleted.value
-                  //       ? Padding(
-                  //           padding:
-                  //               const EdgeInsets.symmetric(horizontal: 24.0),
-                  //           child:
-                  //               CreateItinerarySection(controller: controller),
-                  //         )
-                  //       : buildFirstPhase(controller),
-                  // ),
-                ],
-              ),
+              child: const Column(),
             ),
           );
         }));

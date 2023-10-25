@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../core/theme/style.dart';
+
 class CustomButton {
   Widget showBlueButton(
           {required final void Function() onTap,
@@ -41,14 +43,9 @@ class CustomButton {
           child: Center(
             child: isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                : Text(label,
+                    style: subheading1.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ),
       );

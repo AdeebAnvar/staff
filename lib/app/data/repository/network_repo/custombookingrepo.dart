@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
 
 import 'package:dio/dio.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../../../services/dio_client.dart';
@@ -16,8 +14,8 @@ import '../../models/network_models/food_model.dart';
 import '../../models/network_models/places_model.dart';
 import '../../models/network_models/room_category_model.dart';
 import '../../models/network_models/single_room_model.dart';
+import '../../models/network_models/single_snapshot_model.dart';
 import '../../models/network_models/single_vehicle_model.dart';
-import '../../models/network_models/snapshot_model.dart';
 import '../../models/network_models/vehcile_category_model.dart';
 import '../../models/network_models/vehicle_checking_model.dart';
 import '../../models/network_models/vehicle_price_model.dart';
@@ -463,6 +461,36 @@ class CustomBookingRepo {
           de.error.toString());
     } catch (e) {
       return ApiResponse<List<CustomerSnapshotModel>>.error(e.toString());
+    }
+  }
+
+  Future<List<Result>> getSingleSnapshots(String shotId) async {
+    try {
+      final Map<String, dynamic>? authHeader = await Client().getAuthHeader();
+      final Response<Map<String, dynamic>> res = await dio.getUri(
+          Uri.parse('snapshots/$shotId'),
+          options: Options(headers: authHeader));
+      log('Adeeb Api called');
+      if (res.statusCode == 200) {
+        log('Adeeb status code 200');
+        log('Adeeb res data ${res.data}');
+        final SingleSnapShotModel snap =
+            SingleSnapShotModel.fromJson(res.data!);
+        log('Adeeb res status ${res.statusMessage}');
+
+        return snap.result!;
+      } else {
+        log('Adeeb else');
+        log(' hb h ');
+        return [];
+      }
+    } on DioException catch (de) {
+      log('Adeeb Dio Exception $de');
+      log(de.toString());
+      return [];
+    } catch (e) {
+      log('Adeeb catch $e');
+      return [];
     }
   }
 }

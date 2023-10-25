@@ -101,7 +101,13 @@ class FoodSection extends StatelessWidget {
                                           .toList(),
                                       onConfirm: (List<FoodModel> values) {
                                         final List<String> foodIds = <String>[];
-
+                                        for (final FoodModel element
+                                            in values) {
+                                          controller.foodsForSingleDayName[
+                                                  'Day ${dayIndex + 1}']!
+                                              .add(
+                                                  '${element.foodType} ${element.foodName}');
+                                        }
                                         for (final FoodModel element
                                             in values) {
                                           foodIds.add(element.foodId!);

@@ -28,8 +28,16 @@ class SingleBookingDetailsView extends GetView<SingleBookingDetailsController> {
         ),
       ),
       body: controller.obx((SingleBookingDetailsView? state) => controller
-              .fieldStaffSingleBookingModel.isEmpty
-          ? const CustomEmptyScreen(label: 'No Details')
+                  .fieldStaffSingleBookingModel ==
+              null
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CustomEmptyScreen(label: 'No Details'),
+                ],
+              ),
+            )
           : Column(
               children: <Widget>[
                 buildLabel(
@@ -70,7 +78,8 @@ class SingleBookingDetailsView extends GetView<SingleBookingDetailsController> {
                       ),
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(),
-                        itemCount: tasks.length,
+                        itemCount:
+                            controller.fieldStaffSingleBookingModel.length,
                         itemBuilder: (BuildContext context, int dayIndex) =>
                             Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -84,35 +93,90 @@ class SingleBookingDetailsView extends GetView<SingleBookingDetailsController> {
                                     style: paragraph3),
                                 title: Text('Day ${dayIndex + 1}',
                                     style: heading3),
-                                children: [
+                                children: <Widget>[
                                   ListView.builder(
-                                    physics: NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     shrinkWrap: true,
-                                    itemCount:
-                                        tasks['Day ${dayIndex + 1}']?.length,
-                                    itemBuilder: (context, index) => Card(
-                                      child: Text(
-                                          '${tasks['Day ${dayIndex + 1}']![index]}: ${tasks['Day ${dayIndex + 1}']![index]}'),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: CustomButton().showBlueButton(
-                                            onTap: () {},
-                                            isLoading: false,
-                                            label: 'Completed',
-                                            color:
-                                                telecallerGreen.withGreen(130)),
-                                      ),
-                                      Expanded(
-                                        child: CustomButton().showBlueButton(
-                                            onTap: () {},
-                                            isLoading: false,
-                                            label: 'Not Completed',
-                                            color: telecallerRed.withRed(180)),
-                                      ),
-                                    ],
+                                    itemCount: controller
+                                        .fieldStaffSingleBookingModel[dayIndex]
+                                        .length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      final List<Result> dayItem = controller
+                                              .fieldStaffSingleBookingModel[
+                                          dayIndex];
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Card(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: <Widget>[
+                                                Text(
+                                                  'Task ${index + 1} : ${dayItem[index].task}',
+                                                  style: subheading1,
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  'status : ${dayItem[index].status}',
+                                                  style: subheading2.copyWith(
+                                                      color: dayItem[index]
+                                                                  .status ==
+                                                              'completed'
+                                                          ? telecallerGreen
+                                                              .withGreen(130)
+                                                          : telecallerRed
+                                                              .withRed(180)),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                if (dayItem[index].reason != '')
+                                                  Text(
+                                                    'reason : ${dayItem[index].reason}',
+                                                    style: subheading2.copyWith(
+                                                        color: dayItem[index]
+                                                                    .status ==
+                                                                'completed'
+                                                            ? telecallerGreen
+                                                                .withGreen(130)
+                                                            : telecallerRed
+                                                                .withRed(180)),
+                                                  ),
+                                                Row(
+                                                  children: <Widget>[
+                                                    Expanded(
+                                                      child: CustomButton().showBlueButton(
+                                                          onTap: () => controller
+                                                              .completedTask(
+                                                                  dayItem[index]
+                                                                      .taskId),
+                                                          isLoading: false,
+                                                          label: 'Completed',
+                                                          color: telecallerGreen
+                                                              .withGreen(130)),
+                                                    ),
+                                                    Expanded(
+                                                      child: CustomButton().showBlueButton(
+                                                          onTap: () => controller
+                                                              .notCompletedTask(
+                                                                  dayItem[index]
+                                                                      .taskId),
+                                                          isLoading: false,
+                                                          label:
+                                                              'Not Completed',
+                                                          color: telecallerRed
+                                                              .withRed(180)),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ]),
                           ),
@@ -182,7 +246,7 @@ class SingleBookingDetailsView extends GetView<SingleBookingDetailsController> {
               buildTitle(label: 'Day ${index + 1}', data: ''),
               buildTitle(
                   data: '',
-                  label: fieldStaffSingleBookingModel.task.toString()),
+                  label: ' fieldStaffSingleBookingModel.task.toString()'),
             ],
           ),
         ),
@@ -207,79 +271,3 @@ Padding buildTitle(
     ),
   );
 }
-
-Map<String, List<Map<String, dynamic>>> tasks =
-    <String, List<Map<String, dynamic>>>{
-  'Day 1': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup From Delhi AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-  'Day 2': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup From Delhi AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-  'Day 3': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup From gr AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-  'Day 4': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup From rgr AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-  'Day 5': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup grgrfgvf Delhi AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-  'Day 6': <Map<String, dynamic>>[
-    <String, dynamic>{'place': 'Pickup From Delhi AIRPORT'},
-    <String, dynamic>{
-      'addons': <String>['ddsvf', 'ffrgv']
-    },
-    <String, dynamic>{
-      'activities': <String>['fvfs', 'da']
-    },
-    <String, dynamic>{
-      'foods': <String>['dfds', 'adf']
-    },
-  ],
-};

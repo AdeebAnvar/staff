@@ -12,10 +12,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../core/theme/style.dart';
-import '../../../../core/utils/date_utils.dart';
-import '../../../../core/utils/string_utils.dart';
 import '../../../data/models/local_models/custom_itinerary_datas.dart';
-import '../../../data/models/network_models/food_model.dart';
 import '../../../data/models/network_models/telecaller_model.dart';
 import '../../../data/repository/network_repo/custombookingrepo.dart';
 import '../../../routes/app_pages.dart';
@@ -197,7 +194,7 @@ class CustombookingcalculationController extends GetxController
         margin: const pw.EdgeInsets.symmetric(vertical: 30, horizontal: 25),
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
-          return [];
+          return <pw.Widget>[];
         },
 //         build: (pw.Context context) {
 

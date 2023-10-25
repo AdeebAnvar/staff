@@ -15,10 +15,15 @@ class PdfViewerPageView extends GetView<PdfViewerPageController> {
     return Scaffold(
       appBar: CustomAppBar(
         title: Text(controller.tourCode.toString()),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () => controller.sharePdf(),
-              icon: const Icon(Icons.share))
+        actions: [
+          Card(
+            child: IconButton(
+              onPressed: () {
+                controller.sharePdf();
+              },
+              icon: const Icon(Icons.send),
+            ),
+          )
         ],
       ),
       body: controller.obx(

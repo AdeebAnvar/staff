@@ -19,7 +19,7 @@ class FixedItinerariesController extends GetxController
   List<TourModel> toursDatas = <TourModel>[];
   RxString isFetchingItinerary = RxString('');
   RxString isFetchedItinerary = RxString('');
-  String? phone;
+  String? cid;
   @override
   void onInit() {
     super.onInit();
@@ -31,7 +31,7 @@ class FixedItinerariesController extends GetxController
 
     if (Get.arguments != null) {
       depId = Get.arguments[0] as String;
-      phone = Get.arguments[1] as String;
+      cid = Get.arguments[1] as String;
       await loadTours();
     }
   }
@@ -58,28 +58,6 @@ class FixedItinerariesController extends GetxController
   Future<void> onClickViewItineraries(
       BuildContext context, String fileUrl, String tourCode) async {
     isFetchingItinerary.value = 'Itinerary Fetching....';
-    // showDialog(
-    //   barrierDismissible: false,
-    //   context: context,
-    //   builder: (BuildContext ctx) => AnimatedContainer(
-    //     duration: const Duration(microseconds: 600),
-    //     child: AlertDialog(
-    //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-    //       title: Text(isFetchingItinerary.value, style: subheading1),
-    //       content: Row(
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         children: [
-    //           Padding(
-    //             padding: const EdgeInsets.all(8.0),
-    //             child: CircularProgressIndicator(
-    //               color: getColorFromHex(depColor),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
 
     try {
       await openDownloadedPDF(fileUrl, tourCode);
@@ -108,7 +86,7 @@ class FixedItinerariesController extends GetxController
     isFetchingItinerary.value =
         'Itinerary Fetched trying to open \n Please wait....';
     await Get.toNamed(Routes.PDF_VIEWER_PAGE,
-            arguments: <dynamic>[phone, tourCode])!
+            arguments: <dynamic>[cid, tourCode])!
         .whenComplete(() => loadData());
   }
 

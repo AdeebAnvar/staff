@@ -7,11 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../core/theme/style.dart';
-import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/string_utils.dart';
 import '../../../data/models/network_models/activity_model.dart';
 import '../../../data/models/network_models/addons_model.dart';
@@ -583,7 +581,7 @@ class CustomBookingController extends GetxController
 
     await checkToursNonTransit(
             roomCategories: roomCategories, roomTypes: roomtypes)
-        .then((value) => isGettingRooms.value = false);
+        .then((dynamic value) => isGettingRooms.value = false);
   }
 
   Future<void> checkVehicleAvailability(
@@ -737,7 +735,7 @@ class CustomBookingController extends GetxController
   Future<void> calculateCost({
     required BuildContext context,
   }) async {
-    log('guhffj ${itinerarySnapshots}');
+    log('guhffj $itinerarySnapshots');
     if (placesForSingleDay.length == days.value) {
       final List<String> vehicleNames = <String>[];
 
@@ -1224,6 +1222,7 @@ class CustomBookingController extends GetxController
         placesForSingleDayName,
         addonsForSingleDayName,
         activitiesForSingleDayName,
+        foodsForSingleDayName
       ];
 
       final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;

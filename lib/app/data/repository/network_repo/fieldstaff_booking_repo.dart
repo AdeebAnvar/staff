@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../../../services/dio_client.dart';
@@ -36,31 +38,29 @@ class FieldStaffBookingRepo {
     }
   }
 
-  Future<ApiResponse<List<FieldStaffSingleBookingModel>>>
-      getFieldStaffSingleBookings(String bookingId) async {
+  Future<List<List<Result>>> getFieldStaffSingleBookings(
+      String bookingId) async {
     try {
       final Map<String, dynamic>? authHeader = await Client().getAuthHeader();
       final Response<Map<String, dynamic>> res = await dio.getUri(
           Uri.parse('bookings/staff/tasks?booking_id=$bookingId'),
           options: Options(headers: authHeader));
       if (res.statusCode == 200) {
-        fieldStaffSingleBookingModel =
-            (res.data!['result'] as List<dynamic>).map((dynamic e) {
-          return FieldStaffSingleBookingModel.fromJson(
-              e as Map<String, dynamic>);
-        }).toList();
-        return ApiResponse<List<FieldStaffSingleBookingModel>>.completed(
-            fieldStaffSingleBookingModel);
+        final FieldStaffSingleBookingModel fieldStaffSingleBookingModel =
+            FieldStaffSingleBookingModel.fromJson(res.data!);
+        log('fbgbg ${fieldStaffSingleBookingModel.result}');
+        return fieldStaffSingleBookingModel.result!;
       } else {
-        return ApiResponse<List<FieldStaffSingleBookingModel>>.error(
-            res.statusMessage);
+        log('grgr');
+        return <List<Result>>[];
       }
     } on DioException catch (de) {
-      return ApiResponse<List<FieldStaffSingleBookingModel>>.error(
-          de.error.toString());
+      log('grgr de  $de');
+      log(de.toString());
+      return <List<Result>>[];
     } catch (e) {
-      return ApiResponse<List<FieldStaffSingleBookingModel>>.error(
-          e.toString());
+      log('grgr catch de  $e');
+      return <List<Result>>[];
     }
   }
 }
