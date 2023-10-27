@@ -199,64 +199,73 @@ same we will not be responsible for any kind of refund.
                   fontSize: 15,
                   lineSpacing: 2,
                 )),
-            if (controller.isProposal.value != true)
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: <pw.Widget>[
-                  pw.Column(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
-                      children: <pw.Widget>[
-                        pw.Text('Customer name : ${controller.customerName}',
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: <pw.Widget>[
+                pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+                    children: <pw.Widget>[
+                      pw.Text('Customer name : ${controller.customerName}',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 3),
+                      pw.Text('Customer Id : ${controller.cid}',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 3),
+                      pw.Text(
+                          'Tour date : ${controller.tourStartingDateTime.toString().parseFrom24Hours().toDatewithMonthFormat()}',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 3),
+                      pw.Text('Adult (above 5 years):${controller.adults} ',
+                          style: pw.TextStyle(
+                              fontSize: 10,
+                              decorationThickness: 20,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 3),
+                      if (controller.kids.value != null &&
+                          controller.kids.value != 0)
+                        pw.Text('kids :${controller.kids} ',
                             style: pw.TextStyle(
+                                fontSize: 10,
                                 decorationThickness: 20,
                                 fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 3),
-                        pw.Text('Customer Id : ${controller.customerId}'),
-                        pw.SizedBox(height: 3),
-                        pw.Text(
-                            'Tour date : ${controller.tourStartingDateTime.toString().parseFrom24Hours().toDatewithMonthFormat()}',
+                      pw.SizedBox(height: 3),
+                      if (controller.infants.value != null &&
+                          controller.infants.value != 0)
+                        pw.Text('infants :${controller.infants} ',
                             style: pw.TextStyle(
+                                fontSize: 10,
                                 decorationThickness: 20,
                                 fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 3),
-                        pw.Text('Adult (above 5 years):${controller.adults} ',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 3),
-                        if (controller.kids.value != null &&
-                            controller.kids.value != 0)
-                          pw.Text('kids :${controller.kids} ',
-                              style: pw.TextStyle(
-                                  decorationThickness: 20,
-                                  fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 3),
-                        if (controller.infants.value != null &&
-                            controller.infants.value != 0)
-                          pw.Text('kids :${controller.infants} ',
-                              style: pw.TextStyle(
-                                  decorationThickness: 20,
-                                  fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 3),
-                        pw.Text(
-                            'Executive name : ${controller.telecaCaller.userName}',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text('Package Rate : ${controller.price} /pax',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontSize: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text(
-                            'Advance amount : ${controller.advAmount.value + controller.extraAdvAmount.value} /pax',
-                            style: pw.TextStyle(
-                                decorationThickness: 20,
-                                fontSize: 20,
-                                fontWeight: pw.FontWeight.bold)),
-                      ])
-                ],
-              ),
+                      pw.SizedBox(height: 3),
+                      pw.Text(
+                          'Executive name : ${controller.telecaCaller.userName}',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.Text('Package Rate : ${controller.price} /pax',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 20,
+                              fontWeight: pw.FontWeight.bold)),
+                      pw.Text(
+                          'Advance amount : ${controller.advAmount.value + controller.extraAdvAmount.value} /pax',
+                          style: pw.TextStyle(
+                              decorationThickness: 20,
+                              fontSize: 20,
+                              fontWeight: pw.FontWeight.bold)),
+                    ])
+              ],
+            ),
             pw.SizedBox(height: 20),
             pw.NewPage(),
             pw.Paragraph(

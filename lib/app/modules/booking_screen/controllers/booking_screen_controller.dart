@@ -19,6 +19,7 @@ class BookingScreenController extends GetxController
   GetStorage storage = GetStorage();
   List<SingleLeadModel> leads = <SingleLeadModel>[].obs;
   String? leadId;
+  int? cid;
   bool tourPdfEmpty = true;
   String? leadName;
   RxBool isloading = false.obs;
@@ -77,7 +78,7 @@ class BookingScreenController extends GetxController
   }
 
   void onClickCustomBooking() => Get.toNamed(Routes.CUSTOM_BOOKING,
-          arguments: <dynamic>[toursData, leadId, leadName])!
+          arguments: <dynamic>[toursData, leadId, leadName, cid.toString()])!
       .whenComplete(() => loadData());
 
   Future<void> loadData() async {
@@ -85,6 +86,7 @@ class BookingScreenController extends GetxController
     if (Get.arguments != null) {
       leadName = Get.arguments[0] as String;
       leadId = Get.arguments[1] as String;
+      cid = Get.arguments[2] as int;
 
       await loadLeadData(leadId.toString());
       depID = await storage.read('depID') as String;

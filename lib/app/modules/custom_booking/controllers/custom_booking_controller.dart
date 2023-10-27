@@ -58,6 +58,7 @@ class CustomBookingController extends GetxController
   RxInt infants = 0.obs;
   RxInt adults = 0.obs;
   RxBool tourSelected = false.obs;
+  String? cid;
   RxString selectedRoomCategory = RxString('');
   String? tourStartingDateTime;
   String? tourEndingDateTime;
@@ -250,6 +251,7 @@ class CustomBookingController extends GetxController
       tours.value = Get.arguments[0] as List<TourModel>;
       customerId = Get.arguments[1] as String;
       customerName = Get.arguments[2] as String;
+      cid = Get.arguments[3] as String;
       tourValues.clear();
       telecaCaller = await storage.read('telecaller_data') as TeleCallerModel;
 
@@ -1104,6 +1106,19 @@ class CustomBookingController extends GetxController
     }
 
     String roomString = '';
+    final Map<String, List<String>> activitiesList = <String, List<String>>{};
+    for (int i = 0; i < days.value; i++) {
+      activitiesList['Day ${i + 1}'] = <String>[];
+    }
+    for (var i = 0; i < days.value; i++) {
+      for (final ActivityModel element
+          in activitiesForItinerary['Day ${i + 1}']!) {
+        activitiesList['Day ${i + 1}']!.add(element.activityDes.toString());
+      }
+    }
+    final Map<String, List<String>> activitiesString =
+        activityString(activitiesQuantityForItinerary.value, activitiesList);
+
     for (int i = 0; i < days.value; i++) {
       if (roomsOnDay['Night ${i + 1}'] == null) {
         roomString = '';
@@ -1118,15 +1133,46 @@ class CustomBookingController extends GetxController
                   .map((AddonsModel e) => e.addonDes)
                   .join(' ') +
               lunchString['Day ${i + 1}']! +
-              activitiesForItinerary['Day ${i + 1}']!
-                  .map((ActivityModel e) => e.activityDes)
-                  .join(' ') +
+              // activitiesForItinerary['Day ${i + 1}']!
+              //     .map((ActivityModel e) => e.activityDes)
+              //     .join(' ') +
+              activitiesString['Day ${i + 1}']!.join(' and ') +
               roomString +
               dinnerString['Day ${i + 1}']!;
     }
     log(itinerarySnapshots.toString());
 
     showPreferenceAskingDialogue(controller);
+  }
+
+  Map<String, List<String>> activityString(
+      Map<String, List<Map<String, String>>> dayToPassengers,
+      Map<String, List<String>> dayToActivities) {
+    final Map<String, List<String>> result = <String, List<String>>{};
+    log('daytopassenger $dayToPassengers');
+    log('daytoactivites $dayToActivities');
+    dayToPassengers
+        .forEach((String day, List<Map<String, String>> passengerObjects) {
+      final List<String> activities = dayToActivities[day] ?? <String>[];
+      final List<String> combinedInfo = <String>[];
+
+      if (passengerObjects.isNotEmpty && activities.isNotEmpty) {
+        for (int i = 0; i < passengerObjects.length; i++) {
+          final Map<String, String> passengerInfo = passengerObjects[i];
+          final String activity = activities[i % activities.length];
+          final int passengerCount =
+              int.tryParse(passengerInfo['qty'] ?? '0') ?? 0;
+          if (passengerCount > 0) {
+            combinedInfo.add('$activity for $passengerCount pax');
+          }
+        }
+      }
+
+      result[day] = combinedInfo;
+    });
+    log('result $result');
+
+    return result;
   }
 
   void showPreferenceAskingDialogue(CustomBookingController controller) {

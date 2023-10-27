@@ -82,6 +82,7 @@ class SingleLeadController extends GetxController
     Get.toNamed(Routes.BOOKING_SCREEN, arguments: <dynamic>[
       leads[0].customerName,
       leads[0].customerId,
+      leads[0].cid,
     ]);
   }
 
