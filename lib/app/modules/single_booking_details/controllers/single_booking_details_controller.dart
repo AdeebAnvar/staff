@@ -13,8 +13,6 @@ import '../../../data/repository/network_repo/field_staff_booking_repo.dart';
 import '../../../data/repository/network_repo/fieldstaff_booking_repo.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/dio_client.dart';
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text_form_field.dart';
 import '../../../widgets/custom_toast.dart';
 import '../views/single_booking_details_view.dart';
 
@@ -46,7 +44,7 @@ class SingleBookingDetailsController extends GetxController
   Future<List<List<Result>>> getFieldStaffBookings(String? bookingId) async {
     final List<List<Result>> res =
         await FieldStaffBookingRepo().getFieldStaffSingleBookings(bookingId!);
-    log(' rgvrgv ${res}');
+    log(' rgvrgv $res');
     if (res != null) {
       return res;
     } else {
@@ -85,7 +83,8 @@ class SingleBookingDetailsController extends GetxController
       await FieldStaffBookingsRepository()
           .completedTask(taskId: taskId)
           .then((ApiResponse<Map<String, dynamic>> value) {
-        Future.delayed(const Duration(seconds: 2)).then((value) {
+        Future<dynamic>.delayed(const Duration(seconds: 2))
+            .then((dynamic value) {
           loadingString.value = 'Marking as completed';
           loadData();
         });
@@ -171,7 +170,7 @@ class SingleBookingDetailsController extends GetxController
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                         )),
-                    onChanged: (value) => reason = value,
+                    onChanged: (String value) => reason = value,
                     keyboardType: TextInputType.multiline,
                     minLines: 15,
                     maxLines: 20,
@@ -194,7 +193,7 @@ class SingleBookingDetailsController extends GetxController
     );
   }
 
-  void updateTask(String taskId) async {
+  Future<void> updateTask(String taskId) async {
     if (reason.length <= 3 && reason == '') {
       CustomToastMessage().showCustomToastMessage('Add the reason properly');
     } else {
@@ -206,7 +205,8 @@ class SingleBookingDetailsController extends GetxController
         await FieldStaffBookingsRepository()
             .inCompletedTask(taskId: taskId, reason: reason)
             .then((ApiResponse<Map<String, dynamic>> value) {
-          Future.delayed(const Duration(seconds: 2)).then((value) {
+          Future<dynamic>.delayed(const Duration(seconds: 2))
+              .then((dynamic value) {
             loadingString.value = 'Marking as completed';
             loadData();
           });

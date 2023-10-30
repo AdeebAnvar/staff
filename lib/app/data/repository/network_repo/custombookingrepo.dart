@@ -265,41 +265,61 @@ class CustomBookingRepo {
       required String amountPayable,
       required String advPayment,
       required List<List<String>> tasks,
-      required List<String> bookables,
+      required List<List<String>> bookables,
       required String tourId,
       required String tourStartingDate,
       required String tourEndingDate,
       required String depID,
       required String branchId,
+      required String adult,
+      required String kid,
+      required String infant,
       required String filePath}) async {
     try {
       final String data = convertJsonToString(
-        customerId: customerId,
-        advPayment: advPayment,
-        amountPayable: amountPayable,
+        // customerId: customerId,
+        // advPayment: advPayment,
+        // amountPayable: amountPayable,
         bookables: bookables,
-        branchId: branchId,
-        depID: depID,
+        // branchId: branchId,
+        // depID: depID,
         tasks: tasks,
-        tourEndingDate: tourEndingDate,
-        tourId: tourId,
-        tourStartingDate: tourStartingDate,
+        // adult: adult,
+        // kid: kid,
+        // infant: infant,
+        // tourEndingDate: tourEndingDate,
+        // tourId: tourId,
+        // tourStartingDate: tourStartingDate,
       );
 
       final Map<String, dynamic>? authHeader =
           await Client().getMultiPartAuthHeader();
       final FormData formData = FormData.fromMap(<String, dynamic>{
+        'customer_id': customerId,
+        'amount_payable': amountPayable,
+        'advance_amount': advPayment,
+        'adult': adult,
+        'kid': kid,
+        'infant': infant,
         'data': data,
+        'tour_id': tourId,
+        'start_date': tourStartingDate,
+        'end_date': tourEndingDate,
+        'dep_id': depID,
+        'branch_id': branchId,
         'pdf': await MultipartFile.fromFile(
           filePath,
           filename: 'custom itinerary.pdf',
           contentType: MediaType('application', 'pdf'),
         ),
       });
+
       final Response<Map<String, dynamic>> res = await dio.postUri(
           Uri.parse('bookings'),
           data: formData,
           options: Options(headers: authHeader));
+      log('vfvbetdfb ${res.statusMessage}');
+
       if (res.statusCode == 200) {
         return ApiResponse<Map<String, dynamic>>.completed(res.data);
       } else {
@@ -313,29 +333,27 @@ class CustomBookingRepo {
   }
 
   String convertJsonToString({
-    required String customerId,
-    required String amountPayable,
-    required String advPayment,
+    // required String customerId,
+    // required String amountPayable,
+    // required String advPayment,
     required List<List<String>> tasks,
-    required List<String> bookables,
-    required String tourId,
-    required String tourStartingDate,
-    required String tourEndingDate,
-    required String depID,
-    required String branchId,
+    required List<List<String>> bookables,
+    // required String tourId,
+    // required String tourStartingDate,
+    // required String tourEndingDate,
+    // required String depID,
+    // required String branchId,
+    // required String adult,
+    // required String kid,
+    // required String infant,
   }) {
     final Map<String, dynamic> data = <String, dynamic>{
-      'customer_id': customerId,
-      'amount_payable': amountPayable,
-      'advance_amount': advPayment,
       'tasks': tasks,
-      'bookables': bookables,
-      'tour_id': tourId,
-      'start_date': tourStartingDate,
-      'end_date': tourEndingDate,
-      'dep_id': depID,
-      'branch_id': branchId
+      'bookables': bookables
     };
+    // 'bookables': bookables,
+
+    log(data.toString());
     final String jsonString = json.encode(data);
     return jsonString;
   }
@@ -482,15 +500,15 @@ class CustomBookingRepo {
       } else {
         log('Adeeb else');
         log(' hb h ');
-        return [];
+        return <Result>[];
       }
     } on DioException catch (de) {
       log('Adeeb Dio Exception $de');
       log(de.toString());
-      return [];
+      return <Result>[];
     } catch (e) {
       log('Adeeb catch $e');
-      return [];
+      return <Result>[];
     }
   }
 }

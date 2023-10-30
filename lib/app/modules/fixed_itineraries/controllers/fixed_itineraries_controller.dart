@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io' as io;
 
+// import 'package:dio/dio.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -74,7 +75,7 @@ class FixedItinerariesController extends GetxController
       final io.Directory dir = await getApplicationDocumentsDirectory();
       final String filePath = '${dir.path}/$tourCode.pdf';
 
-      await dio.download(fileUrl, filePath).then((value) async {});
+      await dio.download(fileUrl, filePath).then((dynamic value) async {});
 
       log('PDF file downloaded and saved at: $filePath');
     } catch (e) {

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -19,7 +17,7 @@ class PreviousBookingsView extends GetView<PreviousBookingsController> {
         Get.put(PreviousBookingsController());
     return Scaffold(
       appBar: CustomAppBar(
-        title: Text('Custom Itinerary'),
+        title: const Text('Custom Itinerary'),
       ),
       body: controller.obx(
         (PreviousBookingsView? state) => ListView.builder(

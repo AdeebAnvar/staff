@@ -45,7 +45,7 @@ class BookingScreenView extends GetView<BookingScreenController> {
                                 color: getColorFromHex(depColor)!,
                                 isLoading: controller.isloading.value,
                                 onTap: () => controller.onClickFixedItinerary(),
-                                label: 'Fixed Itinerary'),
+                                label: 'Fixed Tours'),
                           );
                         },
                       ),
@@ -77,7 +77,7 @@ class BookingScreenView extends GetView<BookingScreenController> {
                                         ? const CircularProgressIndicator(
                                             color: Colors.white)
                                         : const Text(
-                                            'Custom Booking',
+                                            'Custom Tour',
                                             style: TextStyle(
                                               fontSize: 20,
                                               color: Colors.black,

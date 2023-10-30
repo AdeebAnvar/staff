@@ -6,7 +6,6 @@ import 'package:get/get_state_manager/src/simple/get_state.dart';
 
 import '../../core/theme/style.dart';
 import '../../core/utils/constants.dart';
-import '../../main.dart';
 import '../data/models/network_models/activity_model.dart';
 import '../data/models/network_models/addons_model.dart';
 import '../data/models/network_models/places_model.dart';
@@ -121,7 +120,8 @@ Widget buildFirstPhase(CustomBookingController controller) {
                       controller.isFetchingData['Day ${i + 1}'] = false;
                     }
                     for (int i = 0; i < int.parse(p0); i++) {
-                      controller.foodsForSingleDayName['Day ${i + 1}'] = [];
+                      controller.foodsForSingleDayName['Day ${i + 1}'] =
+                          <String>[];
                     }
                     for (int i = 0; i < int.parse(p0); i++) {
                       controller
@@ -142,8 +142,8 @@ Widget buildFirstPhase(CustomBookingController controller) {
                     for (int i = 0; i < int.parse(p0); i++) {
                       controller.itinerarySnapshots['Day ${i + 1}'] =
                           <String, dynamic>{
-                        'place_id': null,
-                        'addons': null,
+                        // 'place_id': null,
+                        // 'addons': null,
                         'activity': null,
                         'vehicle': null,
                         'room': null,
@@ -370,7 +370,7 @@ Widget buildFirstPhase(CustomBookingController controller) {
                     ],
                   )
                 : controller.foodModel != null && controller.foodModel.isEmpty
-                    ? SizedBox()
+                    ? const SizedBox()
                     : Row(
                         children: <Widget>[
                           Padding(

@@ -277,6 +277,7 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
         padding: const EdgeInsets.all(10),
         child: ListView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: controller.teleCallerBookings.length,
           itemBuilder: (BuildContext context, int index) {
             final BookingsModel data = controller.teleCallerBookings[index];
@@ -298,7 +299,7 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
                               style: subheading2.copyWith(color: Colors.white)),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -306,7 +307,7 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
                               style: subheading2.copyWith(color: Colors.white)),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -315,7 +316,7 @@ class TelecallerProfileView extends GetView<TelecallerProfileController> {
                               style: subheading2.copyWith(color: Colors.white)),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[

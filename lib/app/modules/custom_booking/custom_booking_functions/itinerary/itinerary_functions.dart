@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import '../../../../core/utils/date_utils.dart';
-import '../../../../core/utils/string_utils.dart';
-import '../controllers/custom_booking_controller.dart';
+import '../../../../../core/utils/date_utils.dart';
+import '../../../../../core/utils/string_utils.dart';
+import '../../controllers/custom_booking_controller.dart';
 
 void createPdf(
     pw.Document pdf, String imageUrl, CustomBookingController controller) {
@@ -14,7 +14,6 @@ void createPdf(
   try {
     return pdf.addPage(
       pw.MultiPage(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         header: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -53,6 +52,7 @@ void createPdf(
                           fontSize: 35,
                         ),
                       ),
+                      pw.SizedBox(height: 10),
                       pw.Text(
                         '${controller.days}D|${controller.nights}N',
                         style: pw.TextStyle(
@@ -60,6 +60,7 @@ void createPdf(
                           fontSize: 28,
                         ),
                       ),
+                      pw.SizedBox(height: 10),
                     ],
                   ),
                 ],
@@ -105,6 +106,7 @@ void createPdf(
                   ],
                 ),
               ),
+            pw.SizedBox(height: 15),
             pw.ListView.builder(
               itemCount: controller.days.value,
               itemBuilder: (pw.Context context, int dayIndex) {
@@ -142,6 +144,7 @@ void createPdf(
                 text:
                     'Pickup drop off\nAll local transport\nSightseeing\nAccomodation',
                 style: const pw.TextStyle(fontSize: 16)),
+            pw.SizedBox(height: 15),
             pw.Paragraph(
                 text: 'HDFC BANK',
                 style:
@@ -154,6 +157,7 @@ void createPdf(
                     lineSpacing: 2,
                     wordSpacing: 2,
                     letterSpacing: 2)),
+            pw.SizedBox(height: 15),
             pw.Paragraph(
               text: 'PAYMENT POLICY - ',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 15),
@@ -180,7 +184,7 @@ void createPdf(
                   fontSize: 15,
                   lineSpacing: 2,
                 )),
-            pw.SizedBox(height: 15),
+            pw.SizedBox(height: 20),
             pw.Paragraph(
                 text: 'CANCELLATION AND REFUND POLICY  - ',
                 style:
@@ -208,25 +212,25 @@ same we will not be responsible for any kind of refund.
                       pw.Text('Customer name : ${controller.customerName}',
                           style: pw.TextStyle(
                               decorationThickness: 20,
-                              fontSize: 10,
+                              fontSize: 13,
                               fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 3),
                       pw.Text('Customer Id : ${controller.cid}',
                           style: pw.TextStyle(
                               decorationThickness: 20,
-                              fontSize: 10,
+                              fontSize: 13,
                               fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 3),
                       pw.Text(
                           'Tour date : ${controller.tourStartingDateTime.toString().parseFrom24Hours().toDatewithMonthFormat()}',
                           style: pw.TextStyle(
                               decorationThickness: 20,
-                              fontSize: 10,
+                              fontSize: 13,
                               fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 3),
                       pw.Text('Adult (above 5 years):${controller.adults} ',
                           style: pw.TextStyle(
-                              fontSize: 10,
+                              fontSize: 13,
                               decorationThickness: 20,
                               fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 3),
@@ -242,7 +246,7 @@ same we will not be responsible for any kind of refund.
                           controller.infants.value != 0)
                         pw.Text('infants :${controller.infants} ',
                             style: pw.TextStyle(
-                                fontSize: 10,
+                                fontSize: 13,
                                 decorationThickness: 20,
                                 fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 3),
@@ -250,7 +254,7 @@ same we will not be responsible for any kind of refund.
                           'Executive name : ${controller.telecaCaller.userName}',
                           style: pw.TextStyle(
                               decorationThickness: 20,
-                              fontSize: 10,
+                              fontSize: 13,
                               fontWeight: pw.FontWeight.bold)),
                       pw.Text('Package Rate : ${controller.price} /pax',
                           style: pw.TextStyle(

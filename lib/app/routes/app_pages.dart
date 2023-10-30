@@ -10,8 +10,6 @@ import '../modules/custom_booking/bindings/custom_booking_binding.dart';
 import '../modules/custom_booking/views/custom_booking_view.dart';
 import '../modules/custom_itinerary/bindings/custom_itinerary_binding.dart';
 import '../modules/custom_itinerary/views/custom_itinerary_view.dart';
-import '../modules/custombookingcalculation/bindings/custombookingcalculation_binding.dart';
-import '../modules/custombookingcalculation/views/custombookingcalculation_view.dart';
 import '../modules/fixed_itineraries/bindings/fixed_itineraries_binding.dart';
 import '../modules/fixed_itineraries/views/fixed_itineraries_view.dart';
 import '../modules/follow_ups/bindings/follow_ups_binding.dart';
@@ -147,11 +145,6 @@ class AppPages {
       name: _Paths.NO_INTERNET,
       page: () => const NoInternetView(),
       binding: NoInternetBinding(),
-    ),
-    GetPage(
-      name: _Paths.CUSTOMBOOKINGCALCULATION,
-      page: () => const CustombookingcalculationView(),
-      binding: CustombookingcalculationBinding(),
     ),
     GetPage(
       name: _Paths.PREVIOUS_BOOKINGS,

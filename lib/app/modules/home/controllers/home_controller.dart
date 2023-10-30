@@ -12,7 +12,6 @@ import '../../../data/models/network_models/leads_model.dart';
 import '../../../data/models/network_models/telecaller_analytics_model.dart';
 import '../../../data/models/network_models/telecaller_model.dart';
 import '../../../data/repository/network_repo/fieldstaff_booking_repo.dart';
-import '../../../data/repository/network_repo/leads_repository.dart';
 import '../../../data/repository/network_repo/telecaller_repo.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/dio_client.dart';

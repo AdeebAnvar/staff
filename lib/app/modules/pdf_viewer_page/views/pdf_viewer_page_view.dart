@@ -15,7 +15,7 @@ class PdfViewerPageView extends GetView<PdfViewerPageController> {
     return Scaffold(
       appBar: CustomAppBar(
         title: Text(controller.tourCode.toString()),
-        actions: [
+        actions: <Widget>[
           Card(
             child: IconButton(
               onPressed: () {

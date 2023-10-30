@@ -14,13 +14,13 @@ class PdfView extends GetView<PdfController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        actions: [
+        actions: <Widget>[
           Card(
             child: IconButton(
               onPressed: () {
                 controller.sharePdf();
               },
-              icon: Icon(Icons.send),
+              icon: const Icon(Icons.send),
             ),
           )
         ],

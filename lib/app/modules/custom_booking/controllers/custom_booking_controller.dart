@@ -33,7 +33,7 @@ import '../../../services/dio_client.dart';
 import '../../../services/dio_download.dart';
 import '../../../widgets/custom_text_form_field.dart';
 import '../../../widgets/custom_toast.dart';
-import '../custom_booking_functions/custom_booking_functions.dart';
+import '../custom_booking_functions/itinerary/itinerary_functions.dart';
 import '../views/custom_booking_view.dart';
 
 class CustomBookingController extends GetxController
@@ -294,7 +294,7 @@ class CustomBookingController extends GetxController
       fetchingAddons['Day ${dayIndex + 1}'] = true;
       final ApiResponse<List<AddonsModel>> res =
           await CustomBookingRepo().getAddons(placeId);
-
+      isFetchingData['fetchingAddons'] = true;
       if (res.data!.isNotEmpty) {
         addonsModel[dayKey] = res.data!;
         addonValues.clear();
@@ -380,7 +380,7 @@ class CustomBookingController extends GetxController
 
   Future<void> onClickCreateItinerary() async {
     onClickGenerateItinerary.value = true;
-
+    log('itinert ${itinerarySnapshots}');
     if (formKey.currentState!.validate()) {
       if (isTransit.value) {
       } else {
@@ -1110,7 +1110,7 @@ class CustomBookingController extends GetxController
     for (int i = 0; i < days.value; i++) {
       activitiesList['Day ${i + 1}'] = <String>[];
     }
-    for (var i = 0; i < days.value; i++) {
+    for (int i = 0; i < days.value; i++) {
       for (final ActivityModel element
           in activitiesForItinerary['Day ${i + 1}']!) {
         activitiesList['Day ${i + 1}']!.add(element.activityDes.toString());
@@ -1140,7 +1140,7 @@ class CustomBookingController extends GetxController
               roomString +
               dinnerString['Day ${i + 1}']!;
     }
-    log(itinerarySnapshots.toString());
+    log('itinerary Snapshots $itinerarySnapshots');
 
     showPreferenceAskingDialogue(controller);
   }
@@ -1163,7 +1163,8 @@ class CustomBookingController extends GetxController
           final int passengerCount =
               int.tryParse(passengerInfo['qty'] ?? '0') ?? 0;
           if (passengerCount > 0) {
-            combinedInfo.add('$activity for $passengerCount pax');
+            combinedInfo.add(
+                'The $activity activity will booked for $passengerCount pax . ');
           }
         }
       }
@@ -1249,79 +1250,216 @@ class CustomBookingController extends GetxController
   Future<void> createItinerary(CustomBookingController controller) async {
     generatingPDF.value = true;
 
-    try {
-      final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
+    // try {
+    final pw.Document pdf = pw.Document(title: 'Custom Itinerary');
 
-      await downloadImage(telecaCaller.depImage.toString()).then(
-          (String? value) => createPdf(pdf, value.toString(), controller));
-      final Directory appDocDir = await getApplicationDocumentsDirectory();
-      final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
-      final File pdfFile = File(pdfPath);
+    await downloadImage(
+            telecaCaller.depImage.toString(), telecaCaller.depName.toString())
+        .then((String? value) => createPdf(pdf, value.toString(), controller));
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String pdfPath = '${appDocDir.path}/custom itinerary.pdf';
+    final File pdfFile = File(pdfPath);
 
-      await pdfFile.writeAsBytes(await pdf.save()).then(
-            (File value) => Get.toNamed(Routes.PDF,
-                arguments: <String>[pdfPath, customerId.toString()]),
-          );
-      generatingPDF.value = false;
-      final List<Map<String, List<String>>?> inputMaps =
-          <Map<String, List<String>>?>[
-        placesForSingleDayName,
-        addonsForSingleDayName,
-        activitiesForSingleDayName,
-        foodsForSingleDayName
-      ];
+    // final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;
+    // await postSnapshots();
 
-      final List<String> bookables = roomTypesDropDown + vehicleTypesDropDown;
-      await postSnapshots();
-      if (isProposal.value != true) {
-        final List<List<String>> resultList = combineMaps(inputMaps);
-        final String id = tours
-            .firstWhere((TourModel element) =>
-                element.tourName == selectedTourWithoutTransit.value)
-            .tourId
-            .toString();
+    final List<Map<String, List<String>>?> inputMaps =
+        <Map<String, List<String>>?>[
+      placesForSingleDayName,
+      addonsForSingleDayName,
+      // activitiesForSingleDayName,
+      foodsForSingleDayName
+    ];
 
-        CustomBookingRepo().customBooking(
-          customerId: customerId.toString(),
-          amountPayable: price.toString(),
-          advPayment: '${advAmount.value + extraAdvAmount.value}',
-          tasks: resultList,
-          bookables: bookables,
-          tourId: id,
-          tourStartingDate: tourStartingDateTime.toString(),
-          tourEndingDate: tourEndingDateTime.toString(),
-          depID: telecaCaller.depId.toString(),
-          branchId: telecaCaller.branchId.toString(),
-          filePath: pdfPath,
-        );
-      }
-    } catch (e) {
-      generatingPDF.value = false;
+    final List<List<String>> resultList = combineMaps(inputMaps);
+    final List<List<String>> dataList = combineDatas();
+    final List<List<String>> totalTasks = joinList(resultList, dataList);
+    final List<List<String>> bookables = getBookables();
+    final String tourId = tours
+        .firstWhere((TourModel element) =>
+            element.tourName == selectedTourWithoutTransit.value)
+        .tourId
+        .toString();
+    log('inputMaps : $itinerarySnapshots');
 
-      log('PDF CREATE CATCH $e');
+    String convertToTotalCost() {
+      final num sum = price * adults.value;
+      return sum.toString();
     }
+
+    String convertToTotalCostAdvance() {
+      final num advsum = advAmount.value + extraAdvAmount.value;
+      final num sum = advsum * adults.value;
+      return sum.toString();
+    }
+
+    await pdfFile.writeAsBytes(await pdf.save()).then(
+          (File value) => Get.toNamed(Routes.PDF, arguments: <dynamic>[
+            pdfPath,
+            controller.customerId.toString(),
+            convertToTotalCost(),
+            convertToTotalCostAdvance(),
+            totalTasks,
+            bookables,
+            tourId,
+            controller.tourStartingDateTime,
+            controller.tourEndingDateTime,
+            controller.telecaCaller.depId,
+            controller.telecaCaller.branchId,
+            controller.isProposal.value,
+            adults.value.toString(),
+            kids.value.toString(),
+            infants.value.toString(),
+          ]),
+        );
+    generatingPDF.value = false;
+
+    // CustomBookingRepo().customBooking(
+    //   customerId: customerId.toString(),
+    //   amountPayable: price.toString(),
+    //   advPayment: '${advAmount.value + extraAdvAmount.value}',
+    //   tasks: resultList,
+    //   bookables: bookables,
+    //   tourId: id,
+    //   tourStartingDate: tourStartingDateTime.toString(),
+    //   tourEndingDate: tourEndingDateTime.toString(),
+    //   depID: telecaCaller.depId.toString(),
+    //   branchId: telecaCaller.branchId.toString(),
+    //   filePath: pdfPath,
+    // );
+    // } catch (e) {
+    //   generatingPDF.value = false;
+
+    //   log('PDF CREATE CATCH $e');
+    // }
+  }
+
+  List<List<String>> getBookables() {
+    final List<List<String>> outputList = <List<String>>[];
+
+    void processNestedData(
+        dynamic data, List<String> dayActivities, String day) {
+      if (data is List) {
+        for (var item in data) {
+          if (item is String) {
+            dayActivities.add(item);
+          } else if (item is Map<String, dynamic>) {
+            final name = item['activity_name'] ??
+                item['vehicle_name'] ??
+                item['room_name'] ??
+                item['food_name'];
+            final qty = item['activity_qty'] ??
+                item['vehicle_qty'] ??
+                item['room_qty'] ??
+                item['food_qty'];
+            if (name != null && qty != null) {
+              dayActivities.add('$name for $qty pax for $day');
+            }
+          } else {
+            // Handle other cases as needed.
+          }
+        }
+      }
+    }
+
+    itinerarySnapshots.forEach((String day, Map<String, dynamic> dayData) {
+      final List<String> dayActivities = <String>[];
+
+      processNestedData(dayData['activity'], dayActivities, day);
+      processNestedData(dayData['vehicle'], dayActivities, day);
+      processNestedData(dayData['room'], dayActivities, day);
+      processNestedData(dayData['food'], dayActivities, day);
+
+      outputList.add(dayActivities);
+    });
+
+    return outputList;
+  }
+
+  List<List<String>> joinList(
+      List<List<String>> list1, List<List<String>> list2) {
+    final List<List<String>> combinedList = <List<String>>[];
+
+    for (int i = 0; i < list1.length; i++) {
+      final List<String> combinedDay = <String>[...list1[i], ...list2[i]];
+      combinedList.add(combinedDay);
+    }
+    return combinedList;
+  }
+
+  List<List<String>> combineDatas() {
+    final List<List<String>> outputList = <List<String>>[];
+
+    void processNestedData(dynamic data, List<String> dayActivities) {
+      if (data is List) {
+        for (var item in data) {
+          if (item is String) {
+            dayActivities.add(item);
+          } else if (item is Map<String, String?>) {
+            final String name = item['activity_name'] ??
+                item['vehicle_name'] ??
+                item['room_name'] ??
+                item['food_name'] ??
+                '';
+            final Object qty = item['activity_qty'] ??
+                item['vehicle_qty'] ??
+                item['room_qty'] ??
+                item['food_qty'] ??
+                0;
+            dayActivities.add('$name for $qty pax');
+          } else {
+            // Handle other cases as needed.
+          }
+        }
+      }
+    }
+
+    itinerarySnapshots.forEach((String day, Map<String, dynamic> dayData) {
+      final List<String> dayActivities = <String>[];
+
+      processNestedData(dayData['activity'], dayActivities);
+      processNestedData(dayData['vehicle'], dayActivities);
+      processNestedData(dayData['room'], dayActivities);
+      processNestedData(dayData['food'], dayActivities);
+
+      outputList.add(dayActivities);
+    });
+
+    return outputList;
   }
 
   List<List<String>> combineMaps(List<Map<String, List<String>>?> maps) {
     // Iterate over each map in the list
-    for (final Map<String, List<String>>? inputMap in maps) {
-      if (inputMap != null) {
-        // Iterate over the keys in the current map
-        inputMap.forEach((String day, List<String> activities) {
-          final int key = int.tryParse(day.split(' ')[1]) ?? 0;
+    // for (final Map<String, List<String>>? inputMap in maps) {
+    //   if (inputMap != null) {
+    // Iterate over the keys in the current map
+    //     inputMap.forEach((String day, List<String> activities) {
+    //      final int key = int.tryParse(day.split(' ')[1]) ?? 0;
 
-          // Ensure that result list has enough days to accommodate the current key
-          while (result.length <= key) {
-            result.add(<String>[]);
-          }
+    // Ensure that result list has enough days to accommodate the current key
+    //      while (result.length <= key) {
+    //       result.add(<String>[]);
+    //      }
 
-          // Add items from the current map to the corresponding day's list
-          result[key].addAll(activities);
-        });
-      }
+    // Add items from the current map to the corresponding day's list
+    //      result[key].addAll(activities);
+    //    });
+    //   }
+    //   }
+    final Map<String, List<String>> result = <String, List<String>>{};
+
+    for (final Map<String, List<String>>? dayMap in maps) {
+      dayMap?.forEach((String day, List<String> places) {
+        if (!result.containsKey(day)) {
+          result[day] = <String>[];
+        }
+        result[day]?.addAll(places);
+      });
     }
 
-    return result;
+    final List<List<String>> outputValues = result.values.toList();
+
+    return outputValues;
   }
 
   Future<void> postSnapshots() async {

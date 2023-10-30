@@ -46,7 +46,7 @@ class PreviousBookingsController extends GetxController
         log(res.message.toString());
         if (res.data != null) {
           snapShotsModel.value = res.data!;
-          for (var i = 0; i < snapShotsModel.length; i++) {
+          for (int i = 0; i < snapShotsModel.length; i++) {
             await getTours(tourIds: snapShotsModel[i].tourIds!.toList());
           }
           change(null, status: RxStatus.success());

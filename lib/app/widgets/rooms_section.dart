@@ -217,13 +217,14 @@ class RoomSection extends StatelessWidget {
                                             .toList(),
                                         onConfirm:
                                             (List<SingleRoomModel> values) {
-                                          final List<String> roomIds =
+                                          final List<String> roomNames =
                                               <String>[];
                                           log('dcfvde ${controller.roomQuantityForItinerary}');
 
                                           for (final SingleRoomModel element
                                               in values) {
-                                            roomIds.add(element.roomId!);
+                                            roomNames.add(
+                                                '${element.roomBuilding} ${element.roomType} ${element.categoryName}');
                                           }
 
                                           for (int j = 0;
@@ -250,9 +251,9 @@ class RoomSection extends StatelessWidget {
 
                                           final List<Map<String, dynamic>>
                                               roomList =
-                                              roomIds.map((String roomId) {
+                                              roomNames.map((String roomName) {
                                             return <String, String?>{
-                                              'room_id': roomId,
+                                              'room_name': roomName,
                                               'room_qty': null,
                                             };
                                           }).toList();
@@ -340,8 +341,8 @@ class RoomSection extends StatelessWidget {
                                               for (final Map<String,
                                                       dynamic> roomData
                                                   in roomList) {
-                                                if (roomData['room_id'] ==
-                                                    room.roomId) {
+                                                if (roomData['room_name'] ==
+                                                    '${room.roomBuilding} ${room.roomType} ${room.categoryName}') {
                                                   roomData['room_qty'] = value;
                                                   break;
                                                 }

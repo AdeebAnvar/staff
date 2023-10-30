@@ -12,7 +12,7 @@ class FixedItinerariesView extends GetView<FixedItinerariesController> {
   const FixedItinerariesView({super.key});
   @override
   Widget build(BuildContext context) {
-    FixedItinerariesController controller =
+    final FixedItinerariesController controller =
         Get.put(FixedItinerariesController());
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -21,11 +21,11 @@ class FixedItinerariesView extends GetView<FixedItinerariesController> {
           onEmpty: const CustomEmptyScreen(label: 'No Fixed Tours'),
           (FixedItinerariesView? state) => ListView(
                 physics: const ClampingScrollPhysics(),
-                children: [
+                children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      onChanged: (value) =>
+                      onChanged: (String value) =>
                           controller.onChangeSearchValue(value),
                       decoration: InputDecoration(
                         hintText: 'Search in itinerarys',
@@ -74,12 +74,6 @@ class FixedItinerariesView extends GetView<FixedItinerariesController> {
                                           controller.toursData[index].tourCode
                                               .toString())
                                       : showDialog(
-                                          barrierDismissible: controller
-                                                      .toursData[index]
-                                                      .tourPdf !=
-                                                  ''
-                                              ? false
-                                              : true,
                                           context: context,
                                           builder: (BuildContext ctx) =>
                                               AnimatedContainer(
@@ -95,7 +89,7 @@ class FixedItinerariesView extends GetView<FixedItinerariesController> {
                                               content: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
-                                                children: [
+                                                children: <Widget>[
                                                   Padding(
                                                     padding:
                                                         const EdgeInsets.all(

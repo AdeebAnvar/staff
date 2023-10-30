@@ -6,10 +6,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../../core/utils/constants.dart';
 import '../../../data/models/network_models/itinerary_model.dart';
@@ -147,13 +146,13 @@ class PdfViewerPageController extends GetxController
                     color: getColorFromHex(depColor),
                   ),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Obx(() {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       DefaultTextStyle(
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                           child: Text(loadingString.value)),
                     ],
                   );

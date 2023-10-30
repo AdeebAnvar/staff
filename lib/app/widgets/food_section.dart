@@ -100,7 +100,8 @@ class FoodSection extends StatelessWidget {
                                               '${e.foodType}  ${e.foodName}'))
                                           .toList(),
                                       onConfirm: (List<FoodModel> values) {
-                                        final List<String> foodIds = <String>[];
+                                        final List<String> foodNames =
+                                            <String>[];
                                         for (final FoodModel element
                                             in values) {
                                           controller.foodsForSingleDayName[
@@ -110,13 +111,14 @@ class FoodSection extends StatelessWidget {
                                         }
                                         for (final FoodModel element
                                             in values) {
-                                          foodIds.add(element.foodId!);
+                                          foodNames.add(
+                                              '${element.foodType} ${element.foodName}');
                                         }
                                         final List<Map<String, dynamic>>
                                             foodList =
-                                            foodIds.map((String foodId) {
+                                            foodNames.map((String foodName) {
                                           return <String, String?>{
-                                            'food_id': foodId,
+                                            'food_name': foodName,
                                             'food_qty': null,
                                           };
                                         }).toList();
@@ -192,8 +194,8 @@ class FoodSection extends StatelessWidget {
                                                 as List<Map<String, dynamic>>;
                                             for (final Map<String,
                                                 dynamic> foodData in foodList) {
-                                              if (foodData['food_id'] ==
-                                                  food.foodId) {
+                                              if (foodData['food_name'] ==
+                                                  '${food.foodType} ${food.foodName}') {
                                                 foodData['food_qty'] = value;
                                                 break;
                                               }

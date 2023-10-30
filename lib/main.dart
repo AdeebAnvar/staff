@@ -57,3 +57,25 @@ class MyHttpOverrides extends HttpOverrides {
           (X509Certificate cert, String host, int port) => true;
   }
 }
+
+  // Future<void> postSnapshots() async {
+  //   final String tourid = tours
+  //       .firstWhere((TourModel element) =>
+  //           element.tourName == selectedTourWithoutTransit.value)
+  //       .tourId
+  //       .toString();
+  //   final List<String> tourIds = <String>[];
+  //   tourIds.add(tourid);
+  //   CustomBookingRepo().postSnapshots(
+  //       adult: adults.value.toString(),
+  //       cid: customerId.toString(),
+  //       data: itinerarySnapshots.values.toList(),
+  //       day: days.value.toString(),
+  //       infant: infants.value.toString(),
+  //       kid: kids.value.toString(),
+  //       night: nights.value.toString(),
+  //       tourEndingDate: tourEndingDateTime.toString(),
+  //       tourStartingDate: tourStartingDateTime.toString(),
+  //       tourIds: tourIds);
+  // }
+  

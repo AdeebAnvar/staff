@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/utils/constants.dart';
@@ -78,7 +77,7 @@ class OldLeadsController extends GetxController with StateMixin<OldLeadsView> {
     } else {
       isLoading.value = false;
       log('kunnunun${isLoading.value}');
-      return [];
+      return <FollowUpModel>[];
     }
   }
 
@@ -92,7 +91,7 @@ class OldLeadsController extends GetxController with StateMixin<OldLeadsView> {
       if (id != null && id != '') {
         await SearchRepository()
             .searchLeadinOldLeadsById(id.toString())
-            .then((value) {
+            .then((ApiResponse<List<FollowUpModel>> value) {
           if (value.data != null && value.data!.isNotEmpty) {
             oldLead.clear();
             oldLead.value = value.data!;
@@ -120,7 +119,7 @@ class OldLeadsController extends GetxController with StateMixin<OldLeadsView> {
       if (id != null && id != '') {
         await SearchRepository()
             .searchLeadinOldLeadsByName(name.toString())
-            .then((value) {
+            .then((ApiResponse<List<FollowUpModel>> value) {
           if (value.data != null && value.data!.isNotEmpty) {
             oldLead.clear();
             oldLead.value = value.data!;

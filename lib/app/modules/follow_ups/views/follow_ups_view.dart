@@ -102,7 +102,7 @@ class FollowUpsView extends GetView<FollowUpsController> {
                         color: Colors.white,
                         backgroundColor: getColorFromHex(depColor),
                         child: SingleChildScrollView(
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           controller: controller.scrollController,
                           child: Column(
                             children: <Widget>[

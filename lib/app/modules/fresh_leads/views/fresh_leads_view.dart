@@ -8,7 +8,6 @@ import '../../../widgets/custom_appbar.dart';
 import '../../../widgets/custom_empty_screen.dart';
 import '../../../widgets/custom_loading_screen.dart';
 import '../../../widgets/custom_search_bar.dart';
-import '../../../widgets/custom_text_form_field.dart';
 import '../controllers/fresh_leads_controller.dart';
 
 class FreshLeadsView extends GetView<FreshLeadsController> {
@@ -104,7 +103,7 @@ class FreshLeadsView extends GetView<FreshLeadsController> {
                         backgroundColor: getColorFromHex(depColor),
                         child: SingleChildScrollView(
                           controller: controller.scrollController,
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           child: Column(
                             children: <Widget>[
                               ListView.separated(

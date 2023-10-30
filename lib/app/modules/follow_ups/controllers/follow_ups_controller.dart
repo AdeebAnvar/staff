@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../../core/utils/constants.dart';
 import '../../../data/models/network_models/followup_model.dart';
-import '../../../data/models/network_models/leads_model.dart';
 import '../../../data/repository/network_repo/leads_repository.dart';
 import '../../../data/repository/network_repo/search_repository.dart';
 import '../../../routes/app_pages.dart';

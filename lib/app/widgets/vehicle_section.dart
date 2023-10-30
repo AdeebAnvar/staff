@@ -176,21 +176,19 @@ class VehicleSection extends StatelessWidget {
                                           <String, String>{'vehicle_name': ''},
                                         );
                                       }
-                                      final List<String> vehIds = <String>[];
+                                      final List<String> vehNames = <String>[];
 
                                       for (final String element in values) {
-                                        final String? id = controller
-                                            .vehicleModel
-                                            .firstWhere(
+                                        final SingleVehicleModel veh =
+                                            controller.vehicleModel.firstWhere(
                                                 (SingleVehicleModel v) =>
-                                                    v.vehicleName == element)
-                                            .vehicleId;
-                                        vehIds.add(id!);
+                                                    v.vehicleName == element);
+                                        vehNames.add('${veh.categoryName}');
                                       }
                                       final List<Map<String, dynamic>> vehList =
-                                          vehIds.map((String roomId) {
+                                          vehNames.map((String vehName) {
                                         return <String, String?>{
-                                          'vehicle_id': roomId,
+                                          'vehicle_name': vehName,
                                           'vehicle_qty': null,
                                         };
                                       }).toList();
@@ -283,20 +281,20 @@ class VehicleSection extends StatelessWidget {
                                                             .selectedVehicles[
                                                         'Day ${dayIndex + 1}']![
                                                     index];
-                                                final String? vehId = controller
-                                                    .vehicleModel
-                                                    .firstWhere(
-                                                        (SingleVehicleModel
-                                                                element) =>
-                                                            element
-                                                                .vehicleName ==
-                                                            vehName)
-                                                    .vehicleId;
+                                                final SingleVehicleModel
+                                                    vehModel = controller
+                                                        .vehicleModel
+                                                        .firstWhere(
+                                                            (SingleVehicleModel
+                                                                    element) =>
+                                                                element
+                                                                    .vehicleName ==
+                                                                vehName);
                                                 for (final Map<String,
                                                         dynamic> vehData
                                                     in vehList) {
-                                                  if (vehData['vehicle_id'] ==
-                                                      vehId) {
+                                                  if (vehData['vehicle_name'] ==
+                                                      '${vehModel.vehicleName} ${vehModel.categoryName}') {
                                                     vehData['vehicle_qty'] =
                                                         value;
                                                     break;

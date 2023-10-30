@@ -54,7 +54,9 @@ class SingleSnapshotController extends GetxController
         }
         await checkRoom(roomIds);
       }
-    } catch (e) {}
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> fetchVehicles() async {}
@@ -81,13 +83,13 @@ class SingleSnapshotController extends GetxController
                     color: getColorFromHex(depColor),
                   ),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Obx(() {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       DefaultTextStyle(
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                           child: Text(loadingString.value)),
                     ],
                   );
@@ -122,6 +124,8 @@ class SingleSnapshotController extends GetxController
   Future<void> checkRoom(List<String> roomIds) async {
     try {
       await SnapShotRepo().fetchRooms(roomIds);
-    } catch (e) {}
+    } catch (e) {
+      log(e.toString());
+    }
   }
 }

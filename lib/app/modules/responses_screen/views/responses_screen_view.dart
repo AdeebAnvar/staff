@@ -26,7 +26,7 @@ class ResponsesScreenView extends GetView<ResponsesScreenController> {
         (ResponsesScreenView? state) => controller.responseModel.isEmpty
             ? const CustomEmptyScreen(label: 'No Responses Till Now')
             : ListView.builder(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 reverse: true,
                 itemCount: controller.responseModel.length,
                 itemBuilder: (BuildContext context, int index) =>
@@ -54,7 +54,7 @@ Widget buildResponseTile(LeadResponseModel leadsResponseModel) => Column(
             ),
             Expanded(
               child: Column(
-                children: [
+                children: <Widget>[
                   Text('Executive : ${leadsResponseModel.userName}'),
                   Container(
                     padding: const EdgeInsets.all(24),

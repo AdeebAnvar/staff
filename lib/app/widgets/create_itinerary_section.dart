@@ -312,11 +312,10 @@ class CreateItinerarySection extends StatelessWidget {
                     controller.isFetchingData[
                         'Day ${dayListviewBuilderIndex + 1}'] = true;
 
-                    controller.itinerarySnapshots[
-                        'Day ${dayListviewBuilderIndex + 1}']!['place_id'] = [
-                      p0[0].placeId
-                    ];
-                    log('ghnjm, ${controller.itinerarySnapshots['Day ${dayListviewBuilderIndex + 1}']!['place_id']}');
+                    // controller.itinerarySnapshots[
+                    //     'Day ${dayListviewBuilderIndex + 1}']!['place_name'] = [
+                    //   p0[0].placeId
+                    // ];
                     if (p0.length == 1) {
                       for (int i = 0; i < controller.placesModel.length; i++) {
                         for (final PlacesModel place in p0) {
@@ -485,10 +484,10 @@ class CreateItinerarySection extends StatelessWidget {
                           addonids.add(matchingAddon.addonId.toString());
                         }
                       }
-                      controller.itinerarySnapshots[
-                              'Day ${dayListviewBuilderIndex + 1}']!['addons'] =
-                          addonids;
-                      log('jkm,l ${controller.itinerarySnapshots['Day ${dayListviewBuilderIndex + 1}']}');
+                      // controller.itinerarySnapshots[
+                      //         'Day ${dayListviewBuilderIndex + 1}']!['addons'] =
+                      //     addonids;
+                      // log('jkm,l ${controller.itinerarySnapshots['Day ${dayListviewBuilderIndex + 1}']}');
 
                       List<String> vehicleNames = <String>[];
                       List<int> vehicleQty = <int>[];
@@ -572,12 +571,12 @@ class CreateItinerarySection extends StatelessWidget {
 
                       log('hiiihihi $activityIds');
                       for (final ActivityModel element in p0) {
-                        activityIds.add(element.activityId!);
+                        activityIds.add(element.activityName!);
                       }
                       final List<Map<String, dynamic>> activityList =
                           activityIds.map((String activityId) {
                         return <String, String?>{
-                          'activity_id': activityId,
+                          'activity_name': activityId,
                           'activity_qty': null,
                         };
                       }).toList();
@@ -589,22 +588,7 @@ class CreateItinerarySection extends StatelessWidget {
                       controller.selectedActivityForaday[
                           'Day ${dayListviewBuilderIndex + 1}'] = p0;
                       log('gvbhnj ${controller.selectedActivityForaday}');
-                      for (final ActivityModel acti in p0) {
-                        final ActivityModel activi = controller.activityModel[
-                                'Day ${dayListviewBuilderIndex + 1}']!
-                            .firstWhere(
-                          (ActivityModel element) => element == acti,
-                          orElse: () => ActivityModel(),
-                        );
-                        for (int i = 0; i < controller.days.value; i++) {
-                          controller
-                                  .activitiesForSingleDayName['Day ${i + 1}'] =
-                              <String>[];
-                        }
-                        controller.activitiesForSingleDayName[
-                                'Day ${dayListviewBuilderIndex + 1}']!
-                            .add(activi.activityName.toString());
-                      }
+
                       log('vfrvr $p0');
                       final List<String> activityNames = <String>[];
                       log('bnkm,jl ${controller.activitiespaxForItinerary}');
@@ -670,6 +654,29 @@ class CreateItinerarySection extends StatelessWidget {
                                         controller.activitiesQuantityForItinerary[
                                                 'Day ${dayListviewBuilderIndex + 1}']![
                                             index]['qty'] = value;
+                                        for (final ActivityModel acti in controller
+                                                .selectedActivityForaday[
+                                            'Day ${dayListviewBuilderIndex + 1}']!) {
+                                          final ActivityModel activi = controller
+                                              .activityModel[
+                                                  'Day ${dayListviewBuilderIndex + 1}']!
+                                              .firstWhere(
+                                            (ActivityModel element) =>
+                                                element == acti,
+                                          );
+                                          for (int i = 0;
+                                              i < controller.days.value;
+                                              i++) {
+                                            controller
+                                                    .activitiesForSingleDayName[
+                                                'Day ${i + 1}'] = <String>[];
+                                          }
+                                          controller.activitiesForSingleDayName[
+                                                  'Day ${dayListviewBuilderIndex + 1}']!
+                                              // ignore: unnecessary_string_interpolations
+                                              .add(
+                                                  '${activi.activityName} for $value pax');
+                                        }
                                         final List<
                                             Map<String,
                                                 dynamic>> activityList = controller
@@ -680,12 +687,12 @@ class CreateItinerarySection extends StatelessWidget {
                                         for (final Map<String,
                                                 dynamic> activityData
                                             in activityList) {
-                                          if (activityData['activity_id'] ==
+                                          if (activityData['activity_name'] ==
                                               controller
                                                   .selectedActivityForaday[
                                                       'Day ${dayListviewBuilderIndex + 1}']
                                                       ?[index]
-                                                  .activityId) {
+                                                  .activityName) {
                                             activityData['activity_qty'] =
                                                 value;
                                             break;

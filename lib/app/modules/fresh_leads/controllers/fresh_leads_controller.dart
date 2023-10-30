@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/utils/constants.dart';
@@ -95,7 +94,7 @@ class FreshLeadsController extends GetxController
       if (id != null && id != '') {
         await SearchRepository()
             .searchLeadinFreshLeadsById(id.toString())
-            .then((value) {
+            .then((ApiResponse<List<LeadsModel>> value) {
           if (value.data != null && value.data!.isNotEmpty) {
             freshLeads.clear();
             freshLeads.value = value.data!;

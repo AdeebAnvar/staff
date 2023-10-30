@@ -62,7 +62,7 @@ class SplashScreenController extends GetxController
               authException.code == 'no-such-provider') {
             // Handle the case where the user is not linked to the provider
             // Redirect the user to the provider linking screen or take appropriate action
-            log('User not linked to the provider: ${authException.toString()}');
+            log('User not linked to the provider: $authException');
             // You can handle this error differently if needed
           } else {
             // Handle other errors

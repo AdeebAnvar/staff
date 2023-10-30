@@ -1,11 +1,7 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 
 import '../../../data/models/network_models/single_leads_model.dart';
-import '../../../data/repository/network_repo/leads_repository.dart';
 import '../../../routes/app_pages.dart';
-import '../../../services/dio_client.dart';
 import '../views/full_leads_view.dart';
 
 class FullLeadsController extends GetxController

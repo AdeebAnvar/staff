@@ -23,11 +23,11 @@ abstract class Routes {
   static const String CUSTOMBOOKINGCALCULATION =
       _Paths.CUSTOMBOOKINGCALCULATION;
   static const String PREVIOUS_BOOKINGS = _Paths.PREVIOUS_BOOKINGS;
-  static const FIXED_ITINERARIES = _Paths.FIXED_ITINERARIES;
-  static const OLD_LEADS = _Paths.OLD_LEADS;
-  static const CUSTOM_ITINERARY = _Paths.CUSTOM_ITINERARY;
-  static const SINGLE_SNAPSHOT = _Paths.SINGLE_SNAPSHOT;
-  static const PDF = _Paths.PDF;
+  static const String FIXED_ITINERARIES = _Paths.FIXED_ITINERARIES;
+  static const String OLD_LEADS = _Paths.OLD_LEADS;
+  static const String CUSTOM_ITINERARY = _Paths.CUSTOM_ITINERARY;
+  static const String SINGLE_SNAPSHOT = _Paths.SINGLE_SNAPSHOT;
+  static const String PDF = _Paths.PDF;
 }
 
 abstract class _Paths {
@@ -51,9 +51,9 @@ abstract class _Paths {
   static const String NO_INTERNET = '/no-internet';
   static const String CUSTOMBOOKINGCALCULATION = '/custombookingcalculation';
   static const String PREVIOUS_BOOKINGS = '/previous-bookings';
-  static const FIXED_ITINERARIES = '/fixed-itineraries';
-  static const OLD_LEADS = '/old-leads';
-  static const CUSTOM_ITINERARY = '/custom-itinerary';
-  static const SINGLE_SNAPSHOT = '/single-snapshot';
-  static const PDF = '/pdf';
+  static const String FIXED_ITINERARIES = '/fixed-itineraries';
+  static const String OLD_LEADS = '/old-leads';
+  static const String CUSTOM_ITINERARY = '/custom-itinerary';
+  static const String SINGLE_SNAPSHOT = '/single-snapshot';
+  static const String PDF = '/pdf';
 }

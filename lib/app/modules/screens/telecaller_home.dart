@@ -168,7 +168,7 @@ class TelecallerHomeScreen extends StatelessWidget {
                         label ?? '',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_right)
+                      const Icon(Icons.arrow_right)
                     ],
                   ),
                 ),

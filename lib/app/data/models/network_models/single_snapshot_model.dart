@@ -56,9 +56,9 @@
 //         adults: json['adults'] == null ? 0 : json['adults'] as int,
 //         kids: json['kids'] == null ? 0 : json['kids'] as int,
 //         infants: json['infants'] == null ? 0 : json['infants'] as int,
-//         data: List<Datum>.from(json['data'].map((x) => Datum.fromJson(x))),
+//         data: List<Datum>.from(json['data'].map((dynamic x) => Datum.fromJson(x))),
 //         created: json['created'] == null ? '' : json['created'] as String,
-//         tourId: List<String>.from(json['tour_id'].map((x) => x)),
+//         tourId: List<String>.from(json['tour_id'].map((dynamic x) => x)),
 //       );
 // }
 
@@ -80,42 +80,42 @@
 
 //   Map<String, dynamic> toJson() => <String, dynamic>{
 //         'place_id':
-//             placeId == null ? [] : List<dynamic>.from(placeId!.map((x) => x)),
+//             placeId == null ? [] : List<dynamic>.from(placeId!.map((dynamic x) => x)),
 //         'addons':
-//             addons == null ? [] : List<dynamic>.from(addons!.map((x) => x)),
+//             addons == null ? [] : List<dynamic>.from(addons!.map((dynamic x) => x)),
 //         'activity': activity == null
 //             ? []
-//             : List<dynamic>.from(activity!.map((x) => x.toJson())),
+//             : List<dynamic>.from(activity!.map((dynamic x) => x.toJson())),
 //         'vehicle': vehicle == null
 //             ? []
-//             : List<dynamic>.from(vehicle!.map((x) => x.toJson())),
+//             : List<dynamic>.from(vehicle!.map((dynamic x) => x.toJson())),
 //         'room': room == null
 //             ? []
-//             : List<dynamic>.from(room!.map((x) => x.toJson())),
+//             : List<dynamic>.from(room!.map((dynamic x) => x.toJson())),
 //         'food': food == null
 //             ? []
 //             : List<dynamic>.from(food!.map((Food x) => x.toJson())),
 //       };
 
 //   static Datum fromJson(Map<String, dynamic> json) => Datum(
-//         placeId: List<String>.from(json['place_id'].map((x) => x)),
+//         placeId: List<String>.from(json['place_id'].map((dynamic x) => x)),
 //         addons: json['addons'] == null
 //             ? []
-//             : List<String>.from(json['addons'].map((x) => x)),
+//             : List<String>.from(json['addons'].map((dynamic x) => x)),
 //         activity: json['activity'] == null
 //             ? []
 //             : List<Activity>.from(
-//                 json['activity'].map((x) => Activity.fromJson(x))),
+//                 json['activity'].map((dynamic x) => Activity.fromJson(x))),
 //         vehicle: json['vehicle'] == null
 //             ? []
 //             : List<Vehicle>.from(
-//                 json['vehicle'].map((x) => Vehicle.fromJson(x))),
+//                 json['vehicle'].map((dynamic x) => Vehicle.fromJson(x))),
 //         room: json['room'] == null
 //             ? []
-//             : List<Room>.from(json['room'].map((x) => Room.fromJson(x))),
+//             : List<Room>.from(json['room'].map((dynamic x) => Room.fromJson(x))),
 //         food: json['food'] == null
 //             ? []
-//             : List<Food>.from(json['food'].map((x) => Food.fromJson(x))),
+//             : List<Food>.from(json['food'].map((dynamic x) => Food.fromJson(x))),
 //       );
 // }
 
@@ -211,20 +211,20 @@ class SingleSnapShotModel {
     log('kunununun${json['result']}');
     if (json['result'] is List) {
       return SingleSnapShotModel(
-        result:
-            List<Result>.from(json['result'].map((x) => Result.fromJson(x))),
+        result: List<Result>.from(
+            json['result'].map((dynamic x) => Result.fromJson(x))),
         success: json['success'],
       );
     } else {
-      return SingleSnapShotModel(result: [], success: false);
+      return SingleSnapShotModel(result: <Result>[], success: false);
     }
   }
 
   List<Result>? result;
   bool? success;
 
-  Map<String, dynamic> toJson() => {
-        'result': List<dynamic>.from(result!.map((x) => x.toJson())),
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'result': List<dynamic>.from(result!.map((Result x) => x.toJson())),
         'success': success,
       };
 }
@@ -255,9 +255,10 @@ class Result {
         adults: json['adults'],
         kids: json['kids'],
         infants: json['infants'],
-        data: List<Datum>.from(json['data'].map((x) => Datum.fromJson(x))),
+        data: List<Datum>.from(
+            json['data'].map((dynamic x) => Datum.fromJson(x))),
         created: DateTime.parse(json['created']),
-        tourId: List<String>.from(json['tour_id'].map((x) => x)),
+        tourId: List<String>.from(json['tour_id'].map((dynamic x) => x)),
       );
   String? shotId;
   String? customerId;
@@ -272,7 +273,7 @@ class Result {
   DateTime? created;
   List<String>? tourId;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'shot_id': shotId,
         'customer_id': customerId,
         'start_date': startDate?.toIso8601String(),
@@ -282,9 +283,9 @@ class Result {
         'adults': adults,
         'kids': kids,
         'infants': infants,
-        'data': List<dynamic>.from(data!.map((x) => x.toJson())),
+        'data': List<dynamic>.from(data!.map((Datum x) => x.toJson())),
         'created': created?.toIso8601String(),
-        'tour_id': List<dynamic>.from(tourId!.map((x) => x)),
+        'tour_id': List<dynamic>.from(tourId!.map((String x) => x)),
       };
 }
 
@@ -300,25 +301,27 @@ class Datum {
 
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
         placeId: json['place_id'] == null
-            ? []
-            : List<String>.from(json['place_id'].map((x) => x)),
+            ? <String>[]
+            : List<String>.from(json['place_id'].map((dynamic x) => x)),
         addons: json['addons'] == null
-            ? []
-            : List<String>.from(json['addons'].map((x) => x)),
+            ? <String>[]
+            : List<String>.from(json['addons'].map((dynamic x) => x)),
         activity: json['activity'] == null
-            ? []
+            ? <Activity>[]
             : List<Activity>.from(
-                json['activity'].map((x) => Activity.fromJson(x))),
+                json['activity'].map((dynamic x) => Activity.fromJson(x))),
         vehicle: json['vehicle'] == null
-            ? []
+            ? <Vehicle>[]
             : List<Vehicle>.from(
-                json['vehicle'].map((x) => Vehicle.fromJson(x))),
+                json['vehicle'].map((dynamic x) => Vehicle.fromJson(x))),
         room: json['room'] == null
-            ? []
-            : List<Room>.from(json['room'].map((x) => Room.fromJson(x))),
+            ? <Room>[]
+            : List<Room>.from(
+                json['room'].map((dynamic x) => Room.fromJson(x))),
         food: json['food'] == null
-            ? []
-            : List<Food>.from(json['food'].map((x) => Food.fromJson(x))),
+            ? <Food>[]
+            : List<Food>.from(
+                json['food'].map((dynamic x) => Food.fromJson(x))),
       );
   List<String>? placeId;
   List<String>? addons;
@@ -327,13 +330,14 @@ class Datum {
   List<Room>? room;
   List<Food>? food;
 
-  Map<String, dynamic> toJson() => {
-        'place_id': List<dynamic>.from(placeId!.map((x) => x)),
-        'addons': List<dynamic>.from(addons!.map((x) => x)),
-        'activity': List<dynamic>.from(activity!.map((x) => x.toJson())),
-        'vehicle': List<dynamic>.from(vehicle!.map((x) => x.toJson())),
-        'room': List<dynamic>.from(room!.map((x) => x.toJson())),
-        'food': List<dynamic>.from(food!.map((x) => x.toJson())),
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'place_id': List<dynamic>.from(placeId!.map((String x) => x)),
+        'addons': List<dynamic>.from(addons!.map((String x) => x)),
+        'activity':
+            List<dynamic>.from(activity!.map((Activity x) => x.toJson())),
+        'vehicle': List<dynamic>.from(vehicle!.map((Vehicle x) => x.toJson())),
+        'room': List<dynamic>.from(room!.map((Room x) => x.toJson())),
+        'food': List<dynamic>.from(food!.map((Food x) => x.toJson())),
       };
 }
 
@@ -350,7 +354,7 @@ class Activity {
   String? activityId;
   String? activityQty;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'activity_id': activityId,
         'activity_qty': activityQty,
       };
@@ -369,7 +373,7 @@ class Room {
   String? roomId;
   String? roomQty;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'room_id': roomId,
         'room_qty': roomQty,
       };
@@ -388,7 +392,7 @@ class Food {
   String? foodId;
   String? foodQty;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'food_id': foodId,
         'food_qty': foodQty,
       };
@@ -407,7 +411,7 @@ class Vehicle {
   String? vehicleId;
   String? vehicleQty;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'vehicle_id': vehicleId,
         'vehicle_qty': vehicleQty,
       };

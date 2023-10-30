@@ -37,7 +37,7 @@ class SingleLeadController extends GetxController
   String? customerName;
   String? vehicle;
   String? pax;
-  RxString selectedCategory = RxString('');
+  RxString? selectedCategory = RxString('');
   String? remarks;
   String tourCode = '';
   GlobalKey<FormState> formKey = GlobalKey();
@@ -282,7 +282,7 @@ class SingleLeadController extends GetxController
         leads = response.data!;
         log('vgbhnjkm ${leads[0].assigned}');
         selectedTourCode.value = leads[0].tourCode.toString();
-        selectedCategory.value = leads[0].customerCategory.toString();
+        selectedCategory!.value = leads[0].customerCategory.toString();
         log(selectedTourCode.value);
       } else {
         change(null, status: RxStatus.empty());
@@ -356,7 +356,8 @@ class SingleLeadController extends GetxController
     final PermissionStatus status =
         await Permission.manageExternalStorage.request();
     if (status.isDenied || status.isPermanentlyDenied || status.isRestricted) {
-      throw 'Please allow storage permission to upload files';
+      CustomToastMessage()
+          .showCustomToastMessage('Please give access to upload files');
     } else {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         onFileLoading: (FilePickerStatus p0) {
@@ -490,13 +491,13 @@ class SingleLeadController extends GetxController
                 Obx(() {
                   return CustomDropDownButton(
                     dropdownValues: const <String>['standard', 'premium'],
-                    value: selectedCategory.value != null &&
-                            selectedCategory.value.isNotEmpty
-                        ? selectedCategory.value.toLowerCase()
+                    value: selectedCategory!.value != null &&
+                            selectedCategory!.value.isNotEmpty
+                        ? selectedCategory!.value.toLowerCase()
                         : null,
                     onChanged: (String? p0) {
-                      selectedCategory.value = p0.toString();
-                      log(selectedCategory.value);
+                      selectedCategory!.value = p0.toString();
+                      log(selectedCategory!.value);
                     },
                     labelText: 'Select Category',
                     errorText: '',
@@ -582,7 +583,7 @@ class SingleLeadController extends GetxController
         customerremarks: leads[0].customerRemarks,
         customersource: leads[0].customerSource,
         customerwhatapp: leads[0].customerWhatsapp,
-        customerCategory: selectedCategory.value ?? leads[0].customerCategory,
+        customerCategory: selectedCategory?.value ?? leads[0].customerCategory,
         customername: customerName ?? leads[0].customerName,
         customerpax: int.parse(pax ?? leads[0].customerPax.toString()),
         remarks: remarks ?? leads[0].customerRemarks,

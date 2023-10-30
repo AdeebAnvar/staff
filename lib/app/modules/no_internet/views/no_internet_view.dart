@@ -17,7 +17,7 @@ class NoInternetView extends GetView<NoInternetController> {
         body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           const CustomEmptyScreen(label: 'Network Problem !'),
           const SizedBox(height: 50),
           CustomButton().showBlueButton(
